@@ -9,11 +9,12 @@
 {% block content %}
 
 <div id="sidebar">
-    <div style="float: right">(<a href="/room/">return to lobby</a>)</div>
-    <h2 id="room-name">{{ room.name }}</h2>
-    <h3 id="room-topic" class="edit">{{ room.topic }}</h3>
+    <div id="channel-description">
+      <div class="room-name" style="display: inline-block;">{{ room.name }}</div>
+      :&nbsp;<div id="room-topic" class="edit" style="font-weight: bold; display: inline-block;">{{ room.topic }}</div>
+    </div>
+    <div>(<a href="/room/">return to lobby</a>)</div>
     <hr/>
-    <h3 id="room-users">Users:</h3>
     <table id="userlist">
       {% for roomlisting in roomlist %}
       <tr id="user-{{ roomlisting.account.nickname }}">
