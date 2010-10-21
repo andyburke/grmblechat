@@ -1,13 +1,15 @@
 import urllib
 import hashlib
 import re
-from datetime import datetime
+import datetime
+import time
 from google.appengine.api import users
+from google.appengine.ext import db
 
 from models import *
 
 
-__all__ = ['leave_room', 'gravatar', 'get_account', 'transform_message']
+__all__ = ['leave_room', 'gravatar', 'get_account', 'transform_message', 'to_dict' ]
 
 
 def leave_room(room=None, account=None, session=None):
@@ -33,7 +35,7 @@ def leave_room(room=None, account=None, session=None):
     session.delete()
 
     # send a message to the room about the part
-    timestamp = datetime.now()
+    timestamp = datetime.datetime.now()
     message = Message(sender=account, room=room, timestamp=timestamp,
                       event=Message_event_codes['part'])
     message.put()
@@ -83,3 +85,34 @@ def transform_message(message):
     else:
         message.content = ''
     return message
+
+# from stackoverflow
+
+SIMPLE_TYPES = ( int, long, float, bool, dict, basestring, list )
+
+def to_dict( model ):
+    output = {}
+
+    for key, prop in model.properties().iteritems():
+        value = getattr( model, key )
+
+        if value is None or isinstance( value, SIMPLE_TYPES ):
+            output[ key ] = value
+        elif isinstance( value, datetime.date ):
+            # Convert date/datetime to ms-since-epoch ("new Date()").
+            ms = time.mktime( value.utctimetuple() ) * 1000
+            ms += getattr( value, 'microseconds', 0 ) / 1000
+            output[ key ] = int( ms )
+        elif isinstance( value, db.Model ):
+            output[ key ] = to_dict( value )
+        elif isinstance( value, db.UserProperty ):
+            output[ key ] = { email: value.email, nickname: value.nickname, user_id: value.user_id }
+        elif isinstance( value, users.User ):
+            output[ key ] = {}
+            methods = ['nickname', 'email', 'user_id'] 
+            for method in methods: 
+                output[ key ][ method ] = getattr( value, method )() 
+        else:
+            raise ValueError( 'cannot encode ' + repr( prop ) )
+
+    return output

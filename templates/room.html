@@ -25,12 +25,9 @@
     </table>
 </div>
 
-<table id="chatlog">
-  {% for message in messages %}
-    {% include "room_message.html" %}
-  {% endfor %}
-  {% include "room_message.html" %}
-</table>
+
+<div id="chatlog">
+</div>
 <div class="text-entry-spacer"></div>
 
 <form id="text-entry" action="/room/{{ room.key }}/msg" method="post">  
@@ -45,6 +42,11 @@
 
 {% block script %}
 the_room = { key: '{{ room.key }}', name: '{{ room.name }}' };
-the_account = { nickname: '{{ account.nickname }}' };
+the_account = { nickname: '{{ account.nickname }}', user: { email: '{{ account.email }}' } };
 chat.initialize(the_room, the_account, '{{ message_last_key }}');
+
+  {% for message in messages %}
+    chat.insertMessage( {{ message }} );
+  {% endfor %}
+
 {% endblock %}

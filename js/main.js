@@ -93,6 +93,7 @@ var chat = function() {
     }
 
     function createMessage(timestamp, sender, msg) {
+//       return { "sender": {"url": "", "gravatar_tag": "<img src=\"http:\/\/www.gravatar.com\/avatar.php?s=30&r=g&d=identicon&gravatar_id=55502f40dc8b7c769880b10874abc9d0\" alt=\"gravatar\" \/>", "nickname": "andy", "user": {"user_id": "185804764220139124118", "nickname": "test@example.com", "email": "test@example.com"}}, "extra": "<img src=\"http:\/\/www.gravatar.com\/avatar.php?s=30&r=g&d=identicon&gravatar_id=55502f40dc8b7c769880b10874abc9d0\" alt=\"gravatar\" \/>", "timestamp": 1287635399000, "content": "", "event_type": "join", "event": 2, "room": {"topic": "", "name": "test"}}
         var $msg_new = $msg_template.clone();
         $msg_new.css('display', '');
         localizeTimestamp($msg_new.find('.msg-timestamp abbr'), timestamp);
@@ -261,6 +262,39 @@ var chat = function() {
         document.title = pristineTitle;
     }
 
+    function getLastMessage()
+    {
+        return $('#chatlog div[class=message]:last');
+    }
+
+    function insertMessage( message )
+    {
+        switch( message.event_type )
+        {
+            case 'join':
+                $('<div author="' + message.sender.nickname + '" class="message event-' + message.event_type + '">' + message.sender.gravatar_tag + message.sender.nickname + '<div class="message" senderEmail="' + message.sender.user.email + '" messageType="' + message.event_type + '">' + '<blockquote>joined</blockquote>' + '</div>' + '</div>').appendTo('#chatlog');
+                break;
+            case 'part':
+                $('<div author="' + message.sender.nickname + '" class="message event-' + message.event_type + '">' + message.sender.gravatar_tag + message.sender.nickname + '<div class="message" senderEmail="' + message.sender.user.email + '" messageType="' + message.event_type + '">' + '<blockquote>left</blockquote>' + '</div>' + '</div>').appendTo('#chatlog');
+                break;
+            case 'topic':
+                $('<div author="' + message.sender.nickname + '" class="message event-' + message.event_type + '">' + message.sender.gravatar_tag + message.sender.nickname + '<div class="message" senderEmail="' + message.sender.user.email + '" messageType="' + message.event_type + '">' + '<blockquote>set the topic to: ' + message.content + '</blockquote>' + '</div>' + '</div>').appendTo('#chatlog');
+                break;
+            default:
+                lastMessage = getLastMessage();
+                if ( lastMessage.length && ( lastMessage.attr( 'messageType' ) == 'message' ) && ( lastMessage.attr( 'senderEmail' ) == message.sender.user.email ) )
+                {
+                    blockquote = $('#chatlog blockquote:last');
+                    blockquote = blockquote.append( '<div id="' + message.key + '">' + message.content + '</div>' );
+                }
+                else
+                {
+                    $('<div author="' + message.sender.nickname + '" class="message event-' + message.event_type + '">' + message.sender.gravatar_tag + message.sender.nickname + '<div class="message" senderEmail="' + message.sender.user.email + '" messageType="' + message.event_type + '">' + '<blockquote>' + message.content + '</blockquote>' + '</div>' + '</div>').appendTo('#chatlog');
+                }
+                break;
+        }
+    }
+
     function initialize(the_room, the_account, message_last_key) {
         // initialize "statics"
         room = the_room;
@@ -301,6 +335,7 @@ var chat = function() {
     // public
     return {
         initialize: initialize,
+        insertMessage: insertMessage,
     };
 
 }();

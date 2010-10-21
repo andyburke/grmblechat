@@ -8,6 +8,8 @@ from datetime import datetime
 from models import *
 from utils import *
 
+from django.utils import simplejson
+
 
 class RoomCollectionHandler(webapp.RequestHandler):
 
@@ -64,16 +66,20 @@ class RoomHandler(webapp.RequestHandler):
             message.put()
             
         roomlist = RoomList.all().filter('room = ', room)
+        message_last_key = messages[-1].key()
         messages = [transform_message(m) for m in messages]
+        messages = [ to_dict( m ) for m in messages ]
+        for m in messages:
+            m[ 'event_type' ] = Message_event_names[ m[ 'event' ] ]
+        messages = [ simplejson.dumps( m ) for m in messages ]
         context = {
             'room': room,
             'account': account,
             'roomlist': roomlist,
             'messages': messages,
             'message_event_names': Message_event_names,
+            'message_last_key': message_last_key
             }
-        if messages:
-            context['message_last_key'] = messages[-1].key()
         self.response.out.write(template.render('templates/room.html', context))
 
                                                     
