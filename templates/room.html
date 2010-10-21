@@ -9,6 +9,7 @@
 {% block content %}
 
 <div id="sidebar">
+    <div style="float: right">(<a href="/room/">return to lobby</a>)</div>
     <h2 id="room-name">{{ room.name }}</h2>
     <h3 id="room-topic" class="edit">{{ room.topic }}</h3>
     <hr/>
@@ -21,12 +22,6 @@
       </tr>
       {% endfor %}
     </table>
-
-    <form action="/room/{{ room.key }}/leave" method="post">
-      <p>
-        <input type="submit" value="Leave Room"/>
-      </p>
-    </form>
 </div>
 
 <table id="chatlog">
