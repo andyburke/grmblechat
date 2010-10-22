@@ -46,6 +46,56 @@ var MessageLinkifier = function()
     };
 };
 
+var ImageHandler = function()
+{
+    this.types = [ 'message' ];
+    this.priority = 10;
+    
+    this.HandleMessage = function( msg )
+    {
+        if ( msg.rawHTML )
+        {
+            return;
+        }
+        
+        var image = msg.content.match( /(https?:\/\/.*?(png|jpg|gif))(?:\W|$)/ig );
+        if ( image && image.length )
+        {
+            $.each( image, function( i )
+            {
+                msg.content = msg.content.replace( this, '<img src="' + this + '">' );
+            });
+            
+            msg.rawHTML = true;
+        }
+    };
+};
+
+var AudioHandler = function()
+{
+    this.types = [ 'message' ];
+    this.priority = 10;
+    
+    this.HandleMessage = function( msg )
+    {
+        if ( msg.rawHTML )
+        {
+            return;
+        }
+        
+        var audio = msg.content.match( /(https?:\/\/.*?mp3)(?:\W|$)/ig );
+        if ( audio && audio.length )
+        {
+            $.each( audio, function( i )
+            {
+                msg.content = msg.content.replace( this, '<p id="audioplayer_' + msg.key + '">' + this +'</p><script type="text/javascript"> AudioPlayer.embed("audioplayer_' + msg.key +'", {soundFile: "' + this +'"});</script>' );
+            });
+            
+            msg.rawHTML = true;
+        }
+    };
+};
+
 var YoutubeHandler = function()
 {
     this.types = [ 'message' ];
@@ -577,6 +627,8 @@ var chat = function() {
         RegisterHandler( new IdleNotifications() );
         RegisterHandler( new MessageRenderer() );
         RegisterHandler( new IdleHandler() );
+        RegisterHandler( new AudioHandler() );
+        RegisterHandler( new ImageHandler() );
 
         // prepare the window for user interaction
         scrollToBottom();
