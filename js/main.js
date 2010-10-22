@@ -118,6 +118,10 @@ var MessageRenderer = function()
     this.HandleMessage = function( msg )
     {
         msg.content = ( typeof( msg.content ) == 'undefined' || msg.content == null ) ? '' : htmlEscape( msg.content );
+        msg.friendlyTimestamp = new Date( msg.timestamp ).format( timestamp_display_format );
+
+        var render = true;
+        
         switch( msg.type )
         {
         case 'message':
@@ -127,25 +131,13 @@ var MessageRenderer = function()
             {
                 $existingLocalMessage.attr( "id", "message-" + msg.key );
                 $existingLocalMessage.find('.msg-content').html( msg.content ); // i guess in case the server does something to our content?
+                render = false;
             }
             else if ( $existingMessage.length != 0 )
             {
                 $existingMessage.attr( "id", "message-" + msg.key );
                 $existingMessage.find('.msg-content').html( msg.content ); // i guess in case the server does something to our content?
-            }
-            else
-            {
-                msg.friendlyTimestamp = new Date( msg.timestamp ).format( timestamp_display_format );
-                html = this.templateSystem.render( 'message_template', msg );
-                lastRow = $( '#chatlog tr:last' )
-                if ( lastRow.length != 0 )
-                {
-                    lastRow.after( html );
-                }
-                else // we have no messages yet
-                {
-                    $( '#chatlog' ).append( html );
-                }
+                render = false;
             }
             break;
         case 'part':
@@ -162,6 +154,20 @@ var MessageRenderer = function()
             break;
         default:
             break;
+        }
+        
+        if ( render )
+        {
+            html = this.templateSystem.render( 'message_template', msg );
+            lastRow = $( '#chatlog tr:last' )
+            if ( lastRow.length != 0 )
+            {
+                lastRow.after( html );
+            }
+            else // we have no messages yet
+            {
+                $( '#chatlog' ).append( html );
+            }
         }
         
         // FIXME: shouldn't do this if the user has scrolled the page, instead we should show that there are new messages somehow
