@@ -42,12 +42,6 @@ class RoomHandler(webapp.RequestHandler):
             self.error(404)
             self.response.out.write("no such room")
             return
-        # return (up to) last 70 messages
-        # FIXME should define '70' as a constant
-        # need to enumerate query results to access last message below
-        # add a second .filter below to hide topic/join/part from template on render
-        # filter('event =', 'message') this appears to break the user list though :(
-        messages = [m for m in reversed(Message.all().filter('room =', room).order('-timestamp').fetch(70))]
         account = get_account()
         roomlist_query = RoomList.all()
         roomlist_query.filter('room = ', room)
@@ -58,27 +52,17 @@ class RoomHandler(webapp.RequestHandler):
             roomlist.put()
             #send a message to update everyone elses contact list
             user = users.get_current_user()
-            sender = Account.all().filter('user =', user).get()
             timestamp = datetime.now()
-            extra = sender.gravatar_tag
-            message = Message(sender=sender, room=room, timestamp=timestamp,
-                              event=Message_event_codes['join'], extra=extra)
+            message = Message( sender = account, room = room, timestamp = timestamp, type = 'join' )
             message.put()
             
         roomlist = RoomList.all().filter('room = ', room)
-        message_last_key = messages[-1].key()
-        messages = [transform_message(m) for m in messages]
-        messages = [ to_dict( m ) for m in messages ]
-        for m in messages:
-            m[ 'event_type' ] = Message_event_names[ m[ 'event' ] ]
-        messages = [ simplejson.dumps( m ) for m in messages ]
+        roomlist = [ to_dict( roomlisting ) for roomlisting in roomlist ]
         context = {
             'room': room,
-            'account': account,
+            'room_json': simplejson.dumps( to_dict( room ) ),
+            'account_json': simplejson.dumps( to_dict( account ) ),
             'roomlist': roomlist,
-            'messages': messages,
-            'message_event_names': Message_event_names,
-            'message_last_key': message_last_key
             }
         self.response.out.write(template.render('templates/room.html', context))
 
