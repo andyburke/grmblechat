@@ -51,15 +51,15 @@ var YoutubeHandler = function()
     };
 };
 
-var TitleHandler = function()
+var TopicHandler = function()
 {
-    this.types = [ 'title' ];
+    this.types = [ 'topic' ];
     this.priority = 0;
     
     this.HandleMessage = function( msg )
     {
-        chat.room.title = msg.content;
-        document.title = chat.room.name + ': ' + chat.room.title;
+        chat.room.topic = msg.content;
+        document.title = chat.room.name + ': ' + chat.room.topic;
         $('#room-topic').text( msg.content );
 
         // are these synchronous?  if so, this isn't good to do this way
@@ -91,7 +91,7 @@ var IdleNotifications = function()
             {
                 isIdle = false;
                 missedMessageCount = 0;
-                document.title = chat.room.title;
+                document.title = chat.room.name + ': ' + chat.room.topic;
             }
             break;
         case 'message':
@@ -100,7 +100,7 @@ var IdleNotifications = function()
             {
                 $.sound.play( '/sounds/message.wav' );
                 ++missedMessageCount;
-                document.title = '(' + missedMessageCount + ') ' + chat.room.title;
+                document.title = '(' + missedMessageCount + ') ' + chat.room.name + ': ' + chat.room.topic;
             }
             break;
         }
@@ -119,12 +119,18 @@ var MessageRenderer = function()
         switch( msg.type )
         {
         case 'message':
-            var $existingMessage = $('#message-' + msg.clientKey );
-            if ( $existingMessage.length != 0 )
+            var $existingLocalMessage = $('#message-' + msg.clientKey );
+            var $existingMessage = $('#message-' + msg.key );
+            if ( $existingLocalMessage.length != 0 )
+            {
+                $existingLocalMessage.attr( "id", "message-" + msg.key );
+                $existingLocalMessage.find('.msg-content').html( msg.content ); // i guess in case the server does something to our content?
+            }
+            else if ( $existingMessage.length != 0 )
             {
                 $existingMessage.attr( "id", "message-" + msg.key );
                 $existingMessage.find('.msg-content').html( msg.content ); // i guess in case the server does something to our content?
-            } 
+            }
             else
             {
                 html = this.templateSystem.render( 'message_template', msg );
@@ -526,7 +532,7 @@ var chat = function() {
         // register our default handlers
         RegisterHandler( new MessageLinkifier() );
         RegisterHandler( new YoutubeHandler() );
-        RegisterHandler( new TitleHandler() );
+        RegisterHandler( new TopicHandler() );
         RegisterHandler( new IdleNotifications() );
         RegisterHandler( new MessageRenderer() );
         RegisterHandler( new IdleHandler() );
