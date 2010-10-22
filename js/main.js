@@ -293,6 +293,7 @@ var chat = function() {
             $text_entry_content.val('');
             update_interval = update_interval_min; // FIXME need to cancel pending update and retrigger it with this new interval
         }
+        
         return false;
     }
 
@@ -531,7 +532,7 @@ var chat = function() {
             callback    : function (value, settings) { $(this).html(value.message) },
         });
         
-        //$('#text-entry').submit( textEntrySubmit ).keydown( textEntryKeydown );
+        $('#text-entry').submit( textEntrySubmit ).keydown( textEntryKeydown );
 
         // register our default handlers
         RegisterHandler( new MessageLinkifier() );
