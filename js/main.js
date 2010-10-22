@@ -353,7 +353,7 @@ var chat = function() {
     {
        return {
                   'sender': account,
-                  'timestamp': new Date(),
+                  'timestamp': new Date().getTime(),
                   'content': messageContent,
                   'type': type,
                   'room': room,
