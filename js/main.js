@@ -36,13 +36,13 @@ var MessageLinkifier = function()
     
     this.HandleMessage = function( msg )
     {
-        if ( msg.contentLinkified )
+        if ( msg.rawHTML )
         {
             return;
         }
 
         msg.content = linkify( msg.content );
-        msg.contentLinkified = true;
+        msg.rawHTML = true;
     };
 };
 
@@ -62,7 +62,7 @@ var YoutubeHandler = function()
 
     this.HandleMessage = function( msg )
     {
-        if ( msg.contentLinkified )
+        if ( msg.rawHTML )
         {
             return;
         }
@@ -73,7 +73,6 @@ var YoutubeHandler = function()
             $.each( vid, function(i) {
                 var ytid = this.replace(/\?v=/,'') // end up with oHg5SJYRHA0
                 msg.content = e1 + ytid + e2 + ytid + e3;
-                msg.contentLinkified = true;
                 msg.rawHTML = true;
             })
         }
