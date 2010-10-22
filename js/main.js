@@ -113,6 +113,8 @@ var MessageRenderer = function()
     this.priority = -100;
     this.templateSystem = new TemplateSystem();
     
+    var timestamp_display_format = 'g:i&\\n\\b\\s\\p;A';
+    
     this.HandleMessage = function( msg )
     {
         msg.content = ( typeof( msg.content ) == 'undefined' || msg.content == null ) ? '' : htmlEscape( msg.content );
@@ -133,6 +135,7 @@ var MessageRenderer = function()
             }
             else
             {
+                msg.friendlyTimestamp = new Date( msg.timestamp ).format( timestamp_display_format );
                 html = this.templateSystem.render( 'message_template', msg );
                 lastRow = $( '#chatlog tr:last' )
                 if ( lastRow.length != 0 )
@@ -200,7 +203,6 @@ var chat = function() {
     var update_interval_error = 1000 * 10;
     var update_interval = update_interval_min;
     var message_display_max = 70;
-    var timestamp_display_format = 'g:i&\\n\\b\\s\\p;A';
     var timestamp_iso8601_format = 'Y-m-d\TH:i:s';
     var do_polling = true;
 
