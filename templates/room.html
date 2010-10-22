@@ -8,6 +8,26 @@
 
 {% block content %}
 
+<script type="text/html" id="message_template">
+    <tr id="message-<%= key %>" class="message event-<%= type %>">
+      <td class="msg-timestamp">
+          <%= timestamp %>
+      </td>
+      <td class="msg-sender">
+        <%= sender.nickname %>
+      </td>
+      <td class="msg-content">
+        <%= content %>
+      </td>
+    </tr>
+</script>
+
+<script type="text/html" id="user_list_entry_template">
+  <tr id="user-<%= sender.email %>">
+    <td><%= sender.gravatar_tag %> <%= sender.nickname %></td>
+  </tr>
+</script>
+
 <div id="sidebar">
     <div id="channel-description">
       <div class="room-name" style="display: inline-block;">{{ room.name }}</div>
@@ -17,7 +37,7 @@
     <hr/>
     <table id="userlist">
       {% for roomlisting in roomlist %}
-      <tr id="user-{{ roomlisting.account.nickname }}">
+      <tr id="user-{{ roomlisting.account.key }}">
         <td>{{ roomlisting.account.gravatar_tag }}
         {{ roomlisting.account.nickname }}</td>
       </tr>
@@ -25,15 +45,12 @@
     </table>
 </div>
 
+
 <table id="chatlog">
-  {% for message in messages %}
-    {% include "room_message.html" %}
-  {% endfor %}
-  {% include "room_message.html" %}
 </table>
 <div class="text-entry-spacer"></div>
 
-<form id="text-entry" action="/room/{{ room.key }}/msg" method="post">  
+<form id="text-entry" action="javascript:chat.textEntrySubmit()" method="post">  
   <div>
     <input id="text-entry-content" type="text" name="content" autocomplete="off"/>
     <input id="send-message" type="submit" value="Send"/>
@@ -44,7 +61,5 @@
 
 
 {% block script %}
-the_room = { key: '{{ room.key }}', name: '{{ room.name }}' };
-the_account = { nickname: '{{ account.nickname }}' };
-chat.initialize(the_room, the_account, '{{ message_last_key }}');
+chat.initialize( {{ room_json }}, {{ account_json }} );
 {% endblock %}

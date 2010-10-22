@@ -1,3 +1,5 @@
+import cgi
+
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.db import Key
@@ -19,14 +21,12 @@ class MessageCollectionHandler(webapp.RequestHandler):
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         timestamp = datetime.now()
         content = self.request.get('content')
-        extra = self.request.get('extra')
         if not sender:
             # no account for this user
             self.response.out.write(template.render('templates/account_create.html', None))
         elif len(content):
             # only create message if content is not empty
-            message = Message(sender=sender, room=room, timestamp=timestamp, content=content,
-                              event=Message_event_codes['message'], extra=extra)
+            message = Message( sender = sender, room = room, timestamp = timestamp, content = content, type = 'message')
             message.put()
         self.redirect('/room/' + room_key)
 
@@ -43,14 +43,7 @@ class APIMessageHandler(webapp.RequestHandler):
             self.error(404)
             self.response.out.write("no such message")
             return
-        message = transform_message(message)
-        url = "/api/"
-        sender_url = url + "account/" + str(message.sender.key())
-        room_url = url + "room/" + str(message.room.key())
-        payload = {'timestamp' : message.timestamp.isoformat(), 'content' : message.content, 
-                   'sender' : sender_url, 'room' : room_url, 'event' : Message_event_names[message.event],
-                   'extra' : extra, 'id' : message.key().id()}
-        json = simplejson.dumps(payload)
+        json = simplejson.dumps( to_dict( message ) )
         self.response.out.write(json)
 
 class APIMessageCollectionHandler(webapp.RequestHandler):
@@ -60,20 +53,24 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
         sender = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         timestamp = datetime.now()
-        content = self.request.get('message')
+
+        try:
+            clientMessage = simplejson.loads( cgi.escape( self.request.get( 'message' ) ) )
+        except Exception, e:
+            self.response.out.write( simplejson.dumps( {'response_status' : 'Could not parse message json: ' + str( e ) } ) )
+            return
+
         payload = {}
         if not sender:
             # no account for this user
             payload = {'response_status' : "No Account Found"}
-        elif len(content):
-            # only create message if content is not empty
-            message = Message(sender=sender, room=room, timestamp=timestamp, content=content,
-                              event=Message_event_codes['message'])
-            message.put()
-            payload = {'response_status' : "OK", 'message' : content, 'id' : message.key().id(),
-                       'timestamp' : message.timestamp.isoformat()}
         else:
-            payload = {'response_status' : "Unknown Error"}
+            message = Message( sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
+            message.put()
+            
+            message = to_dict( message ) # populates the key field for us
+            message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
+            payload = {'response_status' : "OK", 'message' : message }
         json = simplejson.dumps(payload)
         self.response.out.write(json)
 
@@ -127,22 +124,7 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
             url_base = "/api/"
             payload = {}
             if messages:
-                payload['messages'] = []
-                for message in messages:
-                    message = transform_message(message)
-                    sender_url = url_base + "account/" + str(message.sender.key())
-                    room_url = url_base + "room/" + str(message.room.key())
-                    message_data = {
-                        'timestamp' : message.timestamp.isoformat(),
-                        'content' : message.content, 
-                        'sender' : sender_url,
-                        'sender_name' : message.sender.nickname,
-                        'room' : room_url,
-                        'event' : Message_event_names[message.event],
-                        'extra' : message.extra,
-                        'id' : message.key().id(),
-                        }
-                    payload['messages'].append(message_data)
+                payload['messages'] = [ to_dict( m ) for m in messages ]
                 if next_url:
                     payload['next'] = url_base + next_url
             json = simplejson.dumps(payload)
@@ -180,8 +162,7 @@ class APITopicHandler(webapp.RequestHandler):
             # only create message if topic is not empty
             room.topic = topic
             room.put()
-            message = Message(sender=sender, room=room, timestamp=timestamp, content=topic,
-                              event=Message_event_codes['topic'])
+            message = Message( sender = sender, room = room, timestamp = timestamp, content = topic, type = 'topic' )
             message.put()
             payload = {'response_status' : "OK", 'message' : topic, 'timestamp' : timestamp.isoformat()}
         else:
