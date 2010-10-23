@@ -18,6 +18,12 @@
       </td>
       <td class="msg-content">
         <%= content %>
+
+        <div id="like-panel-<%= key %>" style="float: right"> 
+				<img src="/images/like-inactive.png" style="float:left;" alt="" /> 
+				<span id="like-stats-<%= key %>"><%= likes %></span>
+				<span id="like-loader-<%= key %>">&nbsp;</span> 
+	    </div> 
       </td>
     </tr>
 </script>
