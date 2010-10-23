@@ -38,8 +38,7 @@
     <table id="userlist">
       {% for roomlisting in roomlist %}
       <tr id="user-{{ roomlisting.account.key }}">
-        <td>{{ roomlisting.account.gravatar_tag }}
-        {{ roomlisting.account.nickname }}</td>
+        <td>{{ roomlisting.account.gravatar_tag }} <span id="user-nick-{{ roomlisting.account.nickname }}">{{ roomlisting.account.nickname }}</span></td>
       </tr>
       {% endfor %}
     </table>

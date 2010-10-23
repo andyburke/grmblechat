@@ -32,7 +32,7 @@ var TemplateSystem = function()
 var HighlightMeHandler = function()
 {
     this.types = [ 'message' ];
-    this.priority = 0;
+    this.priority = -101;
     
     this.HandleMessage = function( msg )
     {
@@ -404,7 +404,8 @@ var chat = function() {
     {
         if ( event.which == KEY_TAB )
         {
-            var userlist = $('#userlist tr').map( function() { return this.id.substr( 5 ) } );
+            // FIXME: this is an ass way to get the user list
+            var userlist = $('#userlist span').map( function() { return this.id.substr( 10 ) } );
             autocompleteUsername( $(event.target), userlist );
             return false;
         }
