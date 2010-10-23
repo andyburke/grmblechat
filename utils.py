@@ -9,7 +9,16 @@ from google.appengine.ext import db
 from models import *
 
 
-__all__ = ['leave_room', 'gravatar', 'get_account', 'to_dict' ]
+__all__ = [ 'LoginRequired', 'leave_room', 'gravatar', 'get_account', 'to_dict' ]
+
+def LoginRequired( func ):
+    def Wrapper( self, *args, **kw ):
+        user = users.get_current_user()
+        if not user:
+            self.redirect( users.create_login_url( self.request.uri ) )
+        else:
+            func( self, *args, **kw )
+    return Wrapper
 
 
 def leave_room(room=None, account=None, session=None):
