@@ -236,9 +236,12 @@ var MessageRenderer = function()
             }
             break;
         case 'part':
-            var $removeuser = 'user-' + msg.sender.key;
-            $("#" + $removeuser).fadeTo( 'slow', 0.0 );
-            $("#" + $removeuser).remove();
+            if ( msg.sender.key != chat.account.key ) // don't remove ourselves on our old part messages
+            {
+                var $removeuser = 'user-' + msg.sender.key;
+                $("#" + $removeuser).fadeTo( 'slow', 0.0 );
+                $("#" + $removeuser).remove();
+            }
             break;
         case 'join':
             var $adduser = 'user-' + msg.sender.key;
