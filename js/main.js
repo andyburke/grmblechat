@@ -471,7 +471,6 @@ var chat = function() {
                   'content': messageContent,
                   'type': type,
                   'room': room,
-                  'likes': 0,
                   'key': new Date().getTime()
               };
     }
@@ -652,49 +651,6 @@ var chat = function() {
         RegisterHandler( new AudioHandler() );
         RegisterHandler( new ImageHandler() );
         RegisterHandler( new HighlightMeHandler() );
-
-        //
-        // like
-        //
-	/// like 
- 
-        $('.LikeThis').livequery("click",function(e){
-     
-            var messageId = $(this).attr('id').replace('message-','');
-     
-            $("#like-loader-"+messageId).html('<img src="/images/like-inactive.png" alt="" />');
-     
-            $.post("/like/"+messageId, {
-     
-            }, function(response){
-     
-                $('#like-stats-'+messageId).html( response );
-     
-                $('#like-panel-'+messageId).html('<a href="javascript: void(0)" id="message-'+messageId+'" class="Unlike"><img src="/images/like-active.png" alt=""></a>');
-     
-                $("#like-loader-"+messageId).html('');
-            });
-        });	
-     
-        /// unlike 
-     
-        $('.Unlike').livequery("click",function(e){
-     
-            var messageId = $(this).attr('id').replace('message-','');
-     
-            $("#like-loader-"+messageId).html('<img src="/images/like-inactive.png" alt="" />');
-     
-            $.post("/unlike/="+messageId, {
-     
-            }, function(response){
-     
-                $('#like-stats-'+messageId).html( response );
-     
-                $('#like-panel-'+messageId).html('<a href="javascript: void(0)" id="message-'+messageId+'" class="LikeThis"><img src="/images/like-inactive.png" alt=""></a>');
-     
-                $("#like-loader-"+messageId).html('');
-            });
-        });
 
         // prepare the window for user interaction
         scrollToBottom();

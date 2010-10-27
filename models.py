@@ -34,7 +34,3 @@ class Message(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True, required=True)
     type = db.StringProperty(required=True)
     content = db.StringProperty()
-
-class MessageLikes( db.Model ):
-    message = db.ReferenceProperty( reference_class=Message, required=True )
-    account = db.ReferenceProperty( reference_class=Account, required=True )

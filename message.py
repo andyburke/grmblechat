@@ -43,10 +43,7 @@ class APIMessageHandler(webapp.RequestHandler):
             self.error(404)
             self.response.out.write("no such message")
             return
-        messageLikes = MessageLikes.all().filter( 'message = ', message ).count()
-        message = to_dict( message )
-        message[ 'likes' ] = messageLikes
-        json = simplejson.dumps( message )
+        json = simplejson.dumps( to_dict( message ) )
         self.response.out.write(json)
 
 class APIMessageCollectionHandler(webapp.RequestHandler):
@@ -127,17 +124,11 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
             url_base = "/api/"
             payload = {}
             if messages:
-                dictMessages = []
-                for m in messages:
-                    messageLikes = MessageLikes.all().filter( 'message =', m ).count()
-                    m = to_dict( m )
-                    m[ 'likes' ] = messageLikes
-                    dictMessages.append( m )
-                payload['messages'] = dictMessages
+                payload[ 'messages' ] = [ to_dict( m ) for m in messages ]
                 if next_url:
-                    payload['next'] = url_base + next_url
-            json = simplejson.dumps(payload)
-            self.response.out.write(json)
+                    payload[ 'next' ] = url_base + next_url
+            json = simplejson.dumps( payload )
+            self.response.out.write( json )
 
 class TopicHandler(webapp.RequestHandler):
 
