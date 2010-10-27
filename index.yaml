@@ -20,3 +20,10 @@ indexes:
   - name: room
   - name: timestamp
     direction: desc
+
+- kind: Message
+  properties:
+  - name: room
+  - name: type
+  - name: timestamp
+    direction: desc
