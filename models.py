@@ -2,7 +2,7 @@ from google.appengine.ext import db
 from datetime import datetime
 
 
-__all__ = ['Account', 'Room', 'RoomList', 'Message', 'MessageLikes']
+__all__ = ['Account', 'Room', 'RoomList', 'Message']
 
 class Account(db.Model):
     user = db.UserProperty(required=True)
