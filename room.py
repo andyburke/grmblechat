@@ -13,6 +13,7 @@ from django.utils import simplejson
 
 class RoomCollectionHandler(webapp.RequestHandler):
 
+    @LoginRequired
     def get(self):
         rooms = Room.all().order('name')
         self.response.out.write(template.render('templates/room_collection.html',
@@ -35,6 +36,7 @@ class RoomCollectionHandler(webapp.RequestHandler):
 
 class RoomHandler(webapp.RequestHandler):
 
+    @LoginRequired
     def get(self, room_key):
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         if not room:
