@@ -169,11 +169,29 @@ var IdleNotifications = function()
     this.priority = 0;
     
     var faviconURL = '/images/grmblechat.png';
+    var faviconActivityURLs = [ faviconURL, '/images/grmblechat-activity.png' ];
+    var curFaviconIndex = 0;
+    var animatingCallbackId = null;
     var soundURL = '/sounds/message.wav';
     var minTimeBetweenSoundPlays = 5000; // 5 seconds
     var isIdle = false;
     var missedMessageCount = 0;
     var lastSoundPlayTime = new Date();
+    
+    animateFavicon = function()
+    {
+        if ( isIdle )
+        {
+            document.getElementById( 'favicon' ).href = faviconActivityURLs[ curFaviconIndex++ % faviconActivityURLs.length ];
+            animatingFaviconId = setTimeout( animateFavicon, 1000 );
+        }
+        else
+        {
+            document.getElementById( 'favicon' ).href = faviconURL;
+            animatingFaviconId = null;
+            curFaviconIndex = 0;
+        }
+    }
     
     this.HandleMessage = function( msg )
     {
@@ -191,7 +209,6 @@ var IdleNotifications = function()
                 isIdle = false;
                 missedMessageCount = 0;
                 document.title = chat.room.name + ': ' + chat.room.topic;
-                document.getElementById( 'favicon' ).href = faviconURL;
             }
             break;
         case 'message':
@@ -212,28 +229,11 @@ var IdleNotifications = function()
                 }
                 ++missedMessageCount;
                 document.title = '(' + missedMessageCount + ') ' + chat.room.name + ': ' + chat.room.topic;
-                
-                // redraw favicon with missed message count
-                // FIXME: this only seems to work on chrome
-                var canvas = document.createElement('canvas')
-                var ctx;
-                var img = document.createElement('img');
-
-                if ( canvas.getContext )
+            
+                if ( animatingCallbackId == null )
                 {
-                    canvas.height = canvas.width = 16; // set the size to the favicon default
-                    ctx = canvas.getContext( '2d' );
-                    img.onload = function ()
-                    { // once the image has loaded
-                        ctx.drawImage( this, 0, 0 );
-                        ctx.font = 'bold 9px "verdana", sans-serif';
-                        ctx.fillStyle = '#FF0000';
-                        ctx.fillText( missedMessageCount < 10 ? '0' + missedMessageCount : missedMessageCount, 2, 11 );
-                        document.getElementById( 'favicon' ).href = canvas.toDataURL('image/png');
-                    };
-                    img.src = faviconURL;
+                    animatingCallbackId = setTimeout( animateFavicon, 1000 );
                 }
-                
             }
             break;
         }
