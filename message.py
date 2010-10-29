@@ -71,7 +71,11 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
             
             message = to_dict( message ) # populates the key field for us
             message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
-            payload = {'response_status' : "OK", 'message' : message }
+            payload = {
+                        'response_status' : "OK",
+                        'message' : message,
+                        'next' : 'room/%s/msg/?since=%s' % ( room.key(), message[ 'key' ] )
+                      }
         json = simplejson.dumps(payload)
         self.response.out.write(json)
 
@@ -120,13 +124,15 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
                 # erg, need to order by type due to datastore limitations on inequality filters (http://code.google.com/appengine/docs/python/datastore/queriesandindexes.html#Restrictions_on_Queries)
                 messages = [m for m in reversed(Message.all().filter('room =', room).order('-timestamp').fetch(200))]
                 if messages:
+                    # we actually want to set this before we cull the idle/active messages
+                    # otherwise, their next query may pick up lots of unnecessary idle/active messages
+                    next_url = 'room/%s/msg/?since=%s' % (room.key(), messages[-1].key())
                     nonIdleMessages = []
                     for m in messages:
                         if ( m.type != 'idle' and m.type != 'active' ):
                             logging.debug( 'Appended message of type \'%s\' to unlimited message query' % m.type )
                             nonIdleMessages.append( m )
                     messages = nonIdleMessages
-                    next_url = 'room/%s/msg/?since=%s' % (room.key(), messages[-1].key())
                 else:
                     next_url = 'room/%s/msg/' % (room.key())
             url_base = "/api/"

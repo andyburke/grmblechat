@@ -528,8 +528,8 @@ var chat = function() {
                 // rebroadcast it locally so we fix up our temp entry
                 Broadcast( responseMessage );
                 
-                // reset our last message seen
-                chat.lastMessageId = responseMessage.key;
+                // reset our next url
+                chat.url_message_next = response[ 'next' ];
             }
         }
 
@@ -564,14 +564,21 @@ var chat = function() {
                 $.each( data.messages, function( index, message )
                 {
                     Broadcast( message );
-                    chat.lastMessageId = message.key;
                 });
                 update_interval = update_interval_min;
-            } else {
+            }
+            else
+            {
                 // FIXME: we've temporarily changed the backoff from exponential to linear. + 2000 instead of * 2
                 update_interval = Math.min(update_interval + 2000, update_interval_max);
             }
-            setTimeout(updateChat, update_interval);
+            
+            if ( data.next )
+            {
+                url_message_next = data.next;
+            }
+
+            setTimeout( updateChat, update_interval );
         }
 
         function error( request, status, error )
@@ -583,7 +590,7 @@ var chat = function() {
         }
 
         $.ajax({
-            url: url_message_next + this.lastMessageId,
+            url: url_message_next,
             dataType: 'json',
             success: success,
             error: error,
@@ -663,7 +670,6 @@ var chat = function() {
         // initialize "statics"
         this.room = the_room;
         this.account = the_account;
-        this.lastMessageId = '';
         url_message_next = '/api/room/' + this.room.key + '/msg/?since=';
         $chatlog = $('#chatlog');
         $text_entry_content = $('#text-entry-content');
