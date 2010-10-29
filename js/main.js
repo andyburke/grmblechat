@@ -168,8 +168,11 @@ var IdleNotifications = function()
     this.types = [ 'message', 'idle', 'active' ];
     this.priority = 0;
     
+    var faviconUrl = '/images/grmblechat.png';
+    var minTimeBetweenSoundPlays = 5000; // 5 seconds
     var isIdle = false;
     var missedMessageCount = 0;
+    var lastSoundPlayTime = new Date();
     
     this.HandleMessage = function( msg )
     {
@@ -187,15 +190,42 @@ var IdleNotifications = function()
                 isIdle = false;
                 missedMessageCount = 0;
                 document.title = chat.room.name + ': ' + chat.room.topic;
+                document.getElementById( 'favicon' ).href = faviconUrl;
             }
             break;
         case 'message':
         default:
             if ( isIdle )
             {
-                $.sound.play( '/sounds/message.wav' );
+                var now = new Date();
+                if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                {
+                    $.sound.play( '/sounds/message.wav' );
+                    lastSoundPlayTime = now;
+                }
                 ++missedMessageCount;
                 document.title = '(' + missedMessageCount + ') ' + chat.room.name + ': ' + chat.room.topic;
+                
+                // redraw favicon
+                var canvas = document.createElement('canvas')
+                var ctx;
+                var img = document.createElement('img');
+
+                if ( canvas.getContext )
+                {
+                    canvas.height = canvas.width = 16; // set the size to the favicon default
+                    ctx = canvas.getContext( '2d' );
+                    img.onload = function ()
+                    { // once the image has loaded
+                        ctx.drawImage( this, 0, 0 );
+                        ctx.font = 'bold 9px "verdana", sans-serif';
+                        ctx.fillStyle = '#FF0000';
+                        ctx.fillText( missedMessageCount < 10 ? '0' + missedMessageCount : missedMessageCount, 2, 11 );
+                        document.getElementById( 'favicon' ).href = canvas.toDataURL('image/png');
+                    };
+                    img.src = faviconUrl;
+                }
+                
             }
             break;
         }
