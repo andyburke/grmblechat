@@ -198,15 +198,22 @@ var IdleNotifications = function()
             if ( isIdle )
             {
                 var now = new Date();
-                if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+
+                // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
+                //        if there's ever a fix for that, we should remove this browser check
+                if ( !$.browser.mozilla )
                 {
-                    $.sound.play( '/sounds/message.wav' );
-                    lastSoundPlayTime = now;
+                    if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                    {
+                        $.sound.play( '/sounds/message.wav' );
+                        lastSoundPlayTime = now;
+                    }
                 }
                 ++missedMessageCount;
                 document.title = '(' + missedMessageCount + ') ' + chat.room.name + ': ' + chat.room.topic;
                 
-                // redraw favicon
+                // redraw favicon with missed message count
+                // FIXME: this only seems to work on chrome
                 var canvas = document.createElement('canvas')
                 var ctx;
                 var img = document.createElement('img');
