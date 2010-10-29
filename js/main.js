@@ -168,7 +168,8 @@ var IdleNotifications = function()
     this.types = [ 'message', 'idle', 'active' ];
     this.priority = 0;
     
-    var faviconUrl = '/images/grmblechat.png';
+    var faviconURL = '/images/grmblechat.png';
+    var soundURL = '/sounds/message.wav';
     var minTimeBetweenSoundPlays = 5000; // 5 seconds
     var isIdle = false;
     var missedMessageCount = 0;
@@ -190,7 +191,7 @@ var IdleNotifications = function()
                 isIdle = false;
                 missedMessageCount = 0;
                 document.title = chat.room.name + ': ' + chat.room.topic;
-                document.getElementById( 'favicon' ).href = faviconUrl;
+                document.getElementById( 'favicon' ).href = faviconURL;
             }
             break;
         case 'message':
@@ -205,7 +206,7 @@ var IdleNotifications = function()
                 {
                     if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
                     {
-                        $.sound.play( '/sounds/message.wav' );
+                        $.sound.play( soundURL );
                         lastSoundPlayTime = now;
                     }
                 }
@@ -230,7 +231,7 @@ var IdleNotifications = function()
                         ctx.fillText( missedMessageCount < 10 ? '0' + missedMessageCount : missedMessageCount, 2, 11 );
                         document.getElementById( 'favicon' ).href = canvas.toDataURL('image/png');
                     };
-                    img.src = faviconUrl;
+                    img.src = faviconURL;
                 }
                 
             }
