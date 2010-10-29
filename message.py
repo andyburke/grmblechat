@@ -1,3 +1,4 @@
+import logging
 import cgi
 
 from google.appengine.api import users
@@ -43,10 +44,7 @@ class APIMessageHandler(webapp.RequestHandler):
             self.error(404)
             self.response.out.write("no such message")
             return
-        messageLikes = MessageLikes.all().filter( 'message = ', message ).count()
-        message = to_dict( message )
-        message[ 'likes' ] = messageLikes
-        json = simplejson.dumps( message )
+        json = simplejson.dumps( to_dict( message ) )
         self.response.out.write(json)
 
 class APIMessageCollectionHandler(webapp.RequestHandler):
@@ -119,25 +117,26 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
                 # return (up to) last 70 messages
                 # FIXME should define '70' as a constant
                 # need to enumerate query results to access last message
-                messages = [m for m in reversed(Message.all().filter('room =', room).order('-timestamp').fetch(70))]
+                # erg, need to order by type due to datastore limitations on inequality filters (http://code.google.com/appengine/docs/python/datastore/queriesandindexes.html#Restrictions_on_Queries)
+                messages = [m for m in reversed(Message.all().filter('room =', room).order('-timestamp').fetch(200))]
                 if messages:
+                    nonIdleMessages = []
+                    for m in messages:
+                        if ( m.type != 'idle' and m.type != 'active' ):
+                            logging.debug( 'Appended message of type \'%s\' to unlimited message query' % m.type )
+                            nonIdleMessages.append( m )
+                    messages = nonIdleMessages
                     next_url = 'room/%s/msg/?since=%s' % (room.key(), messages[-1].key())
                 else:
                     next_url = 'room/%s/msg/' % (room.key())
             url_base = "/api/"
             payload = {}
             if messages:
-                dictMessages = []
-                for m in messages:
-                    messageLikes = MessageLikes.all().filter( 'message =', m ).count()
-                    m = to_dict( m )
-                    m[ 'likes' ] = messageLikes
-                    dictMessages.append( m )
-                payload['messages'] = dictMessages
+                payload[ 'messages' ] = [ to_dict( m ) for m in messages ]
                 if next_url:
-                    payload['next'] = url_base + next_url
-            json = simplejson.dumps(payload)
-            self.response.out.write(json)
+                    payload[ 'next' ] = url_base + next_url
+            json = simplejson.dumps( payload )
+            self.response.out.write( json )
 
 class TopicHandler(webapp.RequestHandler):
 
@@ -189,7 +188,8 @@ application = webapp.WSGIApplication([(r'/room/([^/]+)/msg', MessageCollectionHa
                                      debug=True)
 
 def main():
-    run_wsgi_app(application)
+    #logging.getLogger().setLevel( logging.DEBUG )
+    run_wsgi_app( application )
 
 if __name__ == '__main__':
     main()

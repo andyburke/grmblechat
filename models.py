@@ -2,7 +2,7 @@ from google.appengine.ext import db
 from datetime import datetime
 
 
-__all__ = ['Account', 'Room', 'RoomList', 'Message', 'MessageLikes']
+__all__ = ['Account', 'Room', 'RoomList', 'Message']
 
 class Account(db.Model):
     user = db.UserProperty(required=True)
@@ -34,7 +34,3 @@ class Message(db.Model):
     timestamp = db.DateTimeProperty(auto_now_add=True, required=True)
     type = db.StringProperty(required=True)
     content = db.StringProperty()
-
-class MessageLikes( db.Model ):
-    message = db.ReferenceProperty( reference_class=Message, required=True )
-    account = db.ReferenceProperty( reference_class=Account, required=True )
