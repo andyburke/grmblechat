@@ -32,6 +32,10 @@
     <div id="channel-description">
       <div class="room-name" style="display: inline-block;">{{ room.name }}</div>
       :&nbsp;<div id="room-topic" class="edit" style="font-weight: bold; display: inline-block;">{{ room.topic }}</div>
+      {% if admin %}
+        <br/>
+        <a href="/room/{{ room.key }}/admin">admin</a>
+      {% endif %}
     </div>
     <div>(<a href="/room/">return to lobby</a>)</div>
     <hr/>

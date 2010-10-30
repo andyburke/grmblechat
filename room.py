@@ -19,8 +19,14 @@ class RoomCollectionHandler(webapp.RequestHandler):
         self.response.out.write(template.render('templates/room_collection.html',
                                                 {'rooms': rooms}
                                                 ))
-
+    @LoginRequired
     def post(self):
+        account = get_account()
+
+        if ( not account ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have an account!' } ) )
+            return
+
         name = self.request.get('name')
         room = Room.all().filter('name =', name).get()
         if room:
@@ -28,11 +34,12 @@ class RoomCollectionHandler(webapp.RequestHandler):
                                                     {'error_msg': 'A room by that name already exists.',
                                                      'name': name}
                                                     ))
-        else:
-            room = Room(name=name)
-            room.put()
-            self.redirect('/room/' + str(room.key()))
-            
+            return
+
+        room = Room( name = name )
+        room.put()
+        RoomAdmin( room = room, account = account ).put() # make the creator an admin
+        self.redirect( '/room/' + str( room.key() ) )
 
 class RoomHandler(webapp.RequestHandler):
 
@@ -45,6 +52,7 @@ class RoomHandler(webapp.RequestHandler):
             self.response.out.write("no such room")
             return
         account = get_account()
+        admin = RoomAdmin.all().filter( 'room = ', room ).filter( 'account =', account ).get()
         roomlist_query = RoomList.all()
         roomlist_query.filter('room = ', room)
         roomlist = roomlist_query.filter('account = ', account).get()
@@ -62,29 +70,54 @@ class RoomHandler(webapp.RequestHandler):
         roomlist = [ to_dict( roomlisting ) for roomlisting in roomlist ]
         context = {
             'room': room,
+            'admin': admin,
             'room_json': simplejson.dumps( to_dict( room ) ),
             'account_json': simplejson.dumps( to_dict( account ) ),
             'roomlist': roomlist,
             }
-        self.response.out.write(template.render('templates/room.html', context))
+        self.response.out.write( template.render( 'templates/room.html', context ) )
 
-                                                    
-class LeaveHandler(webapp.RequestHandler):
-    
-    def post(self, room_key):
-        room = Room.all().filter('__key__ =', Key(room_key)).get()
+class AdminHandler( webapp.RequestHandler ):
+
+    @LoginRequired
+    def get( self, roomKey ):
         account = get_account()
-        leave_room(room=room, account=account)
-        self.redirect('/room/')
+
+        if ( not account ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate your account!' } ) )
+            return
+
+        room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
+
+        if ( not room ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % room_key } ) )
+            return
+
+        admin = RoomAdmin.all().filter( 'room =', room ).filter( 'account =', account ).get()
+
+        if ( not admin ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have admin priveledges for this room.' } ) )
+            return
+
+        self.response.out.write( template.render( 'templates/room_admin.html', { 'room': room } ) )
+                                                    
+class LeaveHandler( webapp.RequestHandler ):
+    
+    def post( self, room_key ):
+        room = Room.all().filter( '__key__ =', Key( room_key ) ).get()
+        account = get_account()
+        leave_room( room = room, account = account )
+        self.redirect( '/room/' )
 
 application = webapp.WSGIApplication([('/room/', RoomCollectionHandler),
                                       (r'/room/([^/]+)', RoomHandler),
+                                      (r'/room/([^/]+)/admin', AdminHandler),
                                       (r'/room/([^/]+)/leave', LeaveHandler)],
                                      debug=True)
 
 def main():
-    webapp.template.register_template_library('filters')
-    run_wsgi_app(application)
+    webapp.template.register_template_library( 'filters' )
+    run_wsgi_app( application )
 
 if __name__ == '__main__':
     main()

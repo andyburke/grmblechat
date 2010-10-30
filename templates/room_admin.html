@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+
+{% block title %}{{ room.name }} Administration{% endblock %}
+
+{% block heading %}{% endblock %}
+
+
+{% block content %}
+
+<h1>Room Admin</h1>
+<hr/>
+<form id="room_admin" action="/room/admin/{{ room.key }}" method="post">
+  <div>
+    Name: <input id="room-name-entry" type="text" name="roomName" value="{{ room.name }}" />
+    <br/>
+    API Key: <input id="room-apiKey-entry" type="text" name="roomApiKey" value="{{ room.apiKey }}"/>
+    <input id="generate-apiKey-button" name="generateApiKeyButton" type="submit" value="Generate"/>
+    <br/>
+    Public: <input id="public-entry" name="public" type="checkbox" {% if room.public %} checked {% endif %} />
+    <br/>
+    Invite Only: <input id="invite-only-entry" name="invite" type="checkbox" {% if room.invite %} checked {% endif %} />
+    <br/>
+    <input id="submit" name="submit" type="submit" value="Apply"/>
+  </div>
+</form>
+
+{% endblock %}

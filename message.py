@@ -47,9 +47,9 @@ class APIMessageHandler(webapp.RequestHandler):
         json = simplejson.dumps( to_dict( message ) )
         self.response.out.write(json)
 
-class APIMessageCollectionHandler(webapp.RequestHandler):
+class APIMessageCollectionHandler( webapp.RequestHandler ):
 
-    def post(self, room_key):
+    def post( self, room_key ):
         user = users.get_current_user()
         sender = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
@@ -61,21 +61,37 @@ class APIMessageCollectionHandler(webapp.RequestHandler):
             self.response.out.write( simplejson.dumps( {'response_status' : 'Could not parse message json: ' + str( e ) } ) )
             return
 
-        payload = {}
-        if not sender:
+        payload = { 'response_status' : 'Programming error.' }
+        if not clientMessage[ 'apiKey' ] and not sender:
             # no account for this user
             payload = {'response_status' : "No Account Found"}
+        
+        if clientMessage[ 'apiKey' ]:
+            if ( room.apiKey == clientMessage[ 'apiKey' ] ):
+                try:
+                    message = Message( nickname = clientMessage[ 'nickname' ], sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
+                    message.put()
+                except Exception, e:
+                    payload = { 'response_status' : 'Could not insert message into database: ' + str( e ) }
+            else:
+                payload = { 'response_status': 'Invalid apiKey for room.' }
         else:
-            message = Message( sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
+            message = Message( nickname = sender.nickname, sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
             message.put()
-            
+
+        if ( message ):
+
             message = to_dict( message ) # populates the key field for us
-            message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
+
+            if ( clientMessage[ 'key' ] ):
+                message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
+
             payload = {
                         'response_status' : "OK",
                         'message' : message,
                         'next' : 'room/%s/msg/?since=%s' % ( room.key(), message[ 'key' ] )
                       }
+                      
         json = simplejson.dumps(payload)
         self.response.out.write(json)
 
