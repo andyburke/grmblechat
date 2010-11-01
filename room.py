@@ -63,7 +63,7 @@ class RoomHandler(webapp.RequestHandler):
             #send a message to update everyone elses contact list
             user = users.get_current_user()
             timestamp = datetime.now()
-            message = Message( sender = account, room = room, timestamp = timestamp, type = 'join' )
+            message = Message( nickname = account.nickname, sender = account, room = room, timestamp = timestamp, type = 'join' )
             message.put()
             
         roomlist = RoomList.all().filter('room = ', room)
