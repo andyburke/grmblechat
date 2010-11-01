@@ -162,9 +162,6 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
             payload = {}
             if messages:
                 payload[ 'messages' ] = [ to_dict( m ) for m in messages ]
-                for m in payload[ 'messages' ]:
-                    if ( not 'nickname' in m or not m[ 'nickname' ] or len( m[ 'nickname' ] ) == 0 ):
-                        m[ 'nickname' ] = m[ 'sender' ][ 'nickname' ]
                 if next_url:
                     payload[ 'next' ] = url_base + next_url
             json = simplejson.dumps( payload )
