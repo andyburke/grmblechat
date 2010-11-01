@@ -89,8 +89,12 @@
     background: #f0f0f0;
 }
 
-#room-name {
+.room-name {
+    line-height: 1.2;
     text-decoration: underline;
+    font-weight: bold;
+    font-size: 200%;
+    display: inline-block;    
 }
 
 #room-topic {
@@ -136,6 +140,8 @@ h3#room-users {
 .edit {
     background: url(/images/page_white_edit.png) no-repeat;
     padding-left: 20px;
+    font-weight: bold;
+    display: inline-block;
 }
 
 #rounded-corner {
