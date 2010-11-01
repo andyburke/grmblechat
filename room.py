@@ -7,6 +7,7 @@ from datetime import datetime
 
 from models import *
 from utils import *
+import re
 
 from django.utils import simplejson
 
@@ -16,8 +17,10 @@ class RoomCollectionHandler(webapp.RequestHandler):
     @LoginRequired
     def get(self):
         rooms = Room.all().order('name')
+        roomlist = RoomList.all()
         self.response.out.write(template.render('templates/room_collection.html',
-                                                {'rooms': rooms}
+                                                {'rooms': rooms, 
+                                                 'roomlist': roomlist}
                                                 ))
     @LoginRequired
     def post(self):
@@ -27,30 +30,43 @@ class RoomCollectionHandler(webapp.RequestHandler):
             self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have an account!' } ) )
             return
 
-        name = self.request.get('name')
-        room = Room.all().filter('name =', name).get()
-        if room:
-            self.response.out.write(template.render('templates/room_collection.html',
-                                                    {'error_msg': 'A room by that name already exists.',
-                                                     'name': name}
-                                                    ))
-            return
+#FIXME: emit a warning when you make a room that already exists
 
-        room = Room( name = name )
+        name = self.request.get( 'name' )
+        slug = name.lower()
+        slug = re.sub(r'\W+', '', slug)
+        room = Room.all().filter( 'slug =', slug ).get()
+        i = 1
+        while room:
+            slug = slug + str( i )
+            room = Room.all().filter( 'slug =', slug ).get()
+            i += 1
+        room = Room( name = name, slug = slug, description = self.request.get( 'description' ) )
         room.put()
+
         RoomAdmin( room = room, account = account ).put() # make the creator an admin
-        self.redirect( '/room/' + str( room.key() ) )
+
+        self.redirect('/room/' + slug)
+            
 
 class RoomHandler(webapp.RequestHandler):
 
     @LoginRequired
     def get(self, room_key):
-        room = Room.all().filter('__key__ =', Key(room_key)).get()
+        room = Room.all().filter('slug =', room_key).get()
         if not room:
-            # room doesn't exist
-            self.error(404)
-            self.response.out.write("no such room")
-            return
+            room = Room.all().filter('__key__ =', Key(room_key)).get()
+            if not room:
+                # room doesn't exist
+                self.error(404)
+                self.response.out.write("no such room")
+                return
+        # return (up to) last 70 messages
+        # FIXME should define '70' as a constant
+        # need to enumerate query results to access last message below
+        # add a second .filter below to hide topic/join/part from template on render
+        # filter('event =', 'message') this appears to break the user list though :(
+        messages = [m for m in reversed(Message.all().filter('room =', room).order('-timestamp').fetch(70))]
         account = get_account()
         admin = RoomAdmin.all().filter( 'room = ', room ).filter( 'account =', account ).get()
         roomlist_query = RoomList.all()

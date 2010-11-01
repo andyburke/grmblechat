@@ -18,6 +18,7 @@ class Room( db.Model ):
     public = db.BooleanProperty( default = True )
     invite = db.BooleanProperty( default = False )
     apiKey = db.StringProperty( default = '' )
+    slug = db.StringProperty()
 
 class RoomAdmin( db.Model ):
     room = db.ReferenceProperty( reference_class = Room, required = True )

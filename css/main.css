@@ -89,13 +89,20 @@
     background: #f0f0f0;
 }
 
+#room-name {
+    text-decoration: underline;
+}
+
 #room-topic {
     line-height: 1.2;
 }
 
+h3#room-users {
+    margin-bottom: .5em;
+}
+
 #userlist {
     font-size: 120%;
-    font-weight: bold;
 }
 
 #userlist img {
@@ -127,13 +134,43 @@
 }
 
 .edit {
-    background: url(/images/page_white_edit.png) no-repeat right top;
-    padding-right: 20px;
+    background: url(/images/page_white_edit.png) no-repeat;
+    padding-left: 20px;
 }
 
-.room-name
-{
-    font-size: 300%;
-    font-weight: bold;
-    text-decoration: underline;
+#rounded-corner {
+    font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size:12px;
+    width:300px;
+    text-align:left;
+    border-collapse:collapse;
+    margin:20px;
+}
+#rounded-corner thead th.rounded-roomname {
+    background:#b9c9fe url("/images/left.png") left -1px no-repeat;
+}
+#rounded-corner thead th.rounded-topic {
+    background:#b9c9fe url("/images/right.png") right -1px no-repeat;
+}
+#rounded-corner th {
+    font-weight:normal;
+    font-size:13px;
+    color:#039;
+    background:#b9c9fe;
+    padding:8px;
+}
+#rounded-corner td{ 
+    background:#e8edff;
+    border-top:1px solid #fff;
+    color:#669;
+    padding:8px;
+}
+#rounded-corner tfoot td.rounded-foot-left {
+    background:#e8edff url("/images/botleft.png") left bottom no-repeat;
+}
+#rounded-corner tfoot td.rounded-foot-right {
+    background:#e8edff url("/images/botright.png") right bottom no-repeat;
+}
+#rounded-corner tbody tr:hover td {
+    background:#d0dafd;
 }
