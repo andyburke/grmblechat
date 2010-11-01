@@ -99,8 +99,37 @@ class AdminHandler( webapp.RequestHandler ):
             self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have admin priveledges for this room.' } ) )
             return
 
-        self.response.out.write( template.render( 'templates/room_admin.html', { 'room': room } ) )
+        self.response.out.write( template.render( 'templates/room_admin.html', { 'room': room, 'roomAPIURL': self.request.host_url + '/api/room/' + str( room.key() ), 'applied': self.request.get( 'applied', default_value = None ) } ) )
                                                     
+    @LoginRequired
+    def post( self, roomKey ):
+        account = get_account()
+
+        if ( not account ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate your account!' } ) )
+            return
+
+        room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
+
+        if ( not room ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % room_key } ) )
+            return
+
+        admin = RoomAdmin.all().filter( 'room =', room ).filter( 'account =', account ).get()
+
+        if ( not admin ):
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have admin priveledges for this room.' } ) )
+            return
+
+        room.name = self.request.get( 'roomName' )
+        room.description = self.request.get( 'roomDescription' )
+        room.apiKey = self.request.get( 'roomApiKey' )
+        room.public = bool( self.request.get( 'public', default_value = False ) )
+        room.invite = bool( self.request.get( 'invite', default_value = False ) )
+        room.put()
+
+        self.redirect( '/room/' + str( room.key() ) + '/admin?applied=1' )
+
 class LeaveHandler( webapp.RequestHandler ):
     
     def post( self, room_key ):

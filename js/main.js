@@ -168,6 +168,7 @@ var chat = function() {
     {
        return {
                   'sender': account,
+                  'nickname': account.nickname,
                   'timestamp': new Date().getTime(),
                   'content': messageContent,
                   'type': type,

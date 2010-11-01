@@ -31,7 +31,7 @@ class MessageCollectionHandler(webapp.RequestHandler):
             message.put()
         self.redirect('/room/' + room_key)
 
-class APIMessageHandler(webapp.RequestHandler):
+class APIMessageHandler( webapp.RequestHandler ):
 
     def get(self, room_key, message_key):
         room = Room.all().filter('__key__ =', Key(room_key)).get()
@@ -62,19 +62,26 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
             return
 
         payload = { 'response_status' : 'Programming error.' }
-        if not clientMessage[ 'apiKey' ] and not sender:
+        if ( not 'apiKey' in clientMessage ) and not sender:
             # no account for this user
-            payload = {'response_status' : "No Account Found"}
+            payload = { 'response_status' : "No Account Found" }
         
-        if clientMessage[ 'apiKey' ]:
-            if ( room.apiKey == clientMessage[ 'apiKey' ] ):
+        elif 'apiKey' in clientMessage:
+            if ( not 'nickname' in clientMessage or len( clientMessage[ 'nickname' ] ) == 0 ):
+                payload = { 'response_status': 'No valid nickname specified in message.' }
+            elif ( not len( room.apiKey ) ):
+                payload = { 'response_status': 'No API access configured for this room.' }
+            
+            elif ( room.apiKey == clientMessage[ 'apiKey' ] ):
                 try:
                     message = Message( nickname = clientMessage[ 'nickname' ], sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
                     message.put()
                 except Exception, e:
                     payload = { 'response_status' : 'Could not insert message into database: ' + str( e ) }
+            
             else:
                 payload = { 'response_status': 'Invalid apiKey for room.' }
+
         else:
             message = Message( nickname = sender.nickname, sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
             message.put()
@@ -83,7 +90,7 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
 
             message = to_dict( message ) # populates the key field for us
 
-            if ( clientMessage[ 'key' ] ):
+            if ( 'key' in clientMessage ):
                 message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
 
             payload = {

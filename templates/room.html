@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 
-
 {% block title %}{{ room.name }}: {{ room.topic }}{% endblock %}
 
 {% block heading %}{% endblock %}
-
 
 {% block content %}
 
@@ -14,7 +12,7 @@
           <%= friendlyTimestamp %>
       </td>
       <td class="msg-sender">
-        <%= sender.nickname %>
+        <%= nickname %>
       </td>
       <td class="msg-content">
         <%= content %>
@@ -61,7 +59,6 @@
 </form>
 
 {% endblock %}
-
 
 {% block script %}
 chat.initialize( {{ room_json }}, {{ account_json }} );

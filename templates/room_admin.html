@@ -1,27 +1,46 @@
 {% extends "base.html" %}
 
-
 {% block title %}{{ room.name }} Administration{% endblock %}
 
 {% block heading %}{% endblock %}
 
-
 {% block content %}
 
-<h1>Room Admin</h1>
+<script language="javascript" type="text/javascript">
+
+function generateKey()
+{
+    var roomName = document.getElementById( 'room-name-entry' ).value;
+    var roomDescription = document.getElementById( 'room-description-entry' ).value;
+    var salt = Math.floor( Math.random() * 1000000000 );
+
+    document.getElementById( 'room-apiKey-entry' ).value = $.sha1( roomName + roomDescription + salt );
+}
+
+window.onload = function () {
+                                  $('#applied').fadeTo( 2000, 0.0 )
+                              }
+
+</script>
+
+<h1>Room Admin (<a href="/room/{{ room.key }}">back to room</a>)</h1>
 <hr/>
-<form id="room_admin" action="/room/admin/{{ room.key }}" method="post">
+<form id="room_admin" action="/room/{{ room.key }}/admin" method="post">
   <div>
     Name: <input id="room-name-entry" type="text" name="roomName" value="{{ room.name }}" />
     <br/>
-    API Key: <input id="room-apiKey-entry" type="text" name="roomApiKey" value="{{ room.apiKey }}"/>
-    <input id="generate-apiKey-button" name="generateApiKeyButton" type="submit" value="Generate"/>
+    Description: <input id="room-description-entry" type="text" size="100" name="roomDescription" value="{{ room.description }}" />
     <br/>
-    Public: <input id="public-entry" name="public" type="checkbox" {% if room.public %} checked {% endif %} />
+    API URL: <input id="room-apiURL-entry" type="text" size="100" name="roomAPIURL" value="{{ roomAPIURL }}" readonly style="background-color: #CCCCCC"/>
     <br/>
-    Invite Only: <input id="invite-only-entry" name="invite" type="checkbox" {% if room.invite %} checked {% endif %} />
+    API Key: <input id="room-apiKey-entry" type="text" size="100" name="roomApiKey" value="{{ room.apiKey }}"/>
+    <input id="generate-apiKey-button" name="generateApiKeyButton" type="button" value="Generate" onClick="generateKey();" />
     <br/>
-    <input id="submit" name="submit" type="submit" value="Apply"/>
+    Public: <input id="public-entry" name="public" type="checkbox" value="True" {% if room.public %} checked {% endif %} />
+    <br/>
+    Invite Only: <input id="invite-only-entry" name="invite" type="checkbox" value="True" {% if room.invite %} checked {% endif %} />
+    <br/>
+    <input id="submit" name="submit" type="submit" value="Apply"/> <span id="applied">{% if applied %}Applied...{% endif %}</span>
   </div>
 </form>
 

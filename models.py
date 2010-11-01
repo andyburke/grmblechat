@@ -4,18 +4,20 @@ from datetime import datetime
 
 __all__ = ['Account', 'Room', 'RoomAdmin', 'RoomList', 'Message']
 
-class Account(db.Model):
+class Account( db.Model ):
     user = db.UserProperty(required=True)
     nickname = db.StringProperty(required=True)
     url = db.StringProperty(default='')
     gravatar_tag = db.StringProperty(default='')    
 
 
-class Room(db.Model):
+class Room( db.Model ):
     name = db.StringProperty(required=True)
-    topic = db.StringProperty(default='')
+    description = db.StringProperty( default = '' )
+    topic = db.StringProperty( default = '' )
     public = db.BooleanProperty( default = True )
-    apiKey = db.StringProperty()
+    invite = db.BooleanProperty( default = False )
+    apiKey = db.StringProperty( default = '' )
 
 class RoomAdmin( db.Model ):
     room = db.ReferenceProperty( reference_class = Room, required = True )
