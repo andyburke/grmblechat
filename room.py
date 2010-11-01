@@ -115,7 +115,16 @@ class AdminHandler( webapp.RequestHandler ):
             self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have admin priveledges for this room.' } ) )
             return
 
-        self.response.out.write( template.render( 'templates/room_admin.html', { 'room': room, 'roomAPIURL': self.request.host_url + '/api/room/' + str( room.key() ), 'applied': self.request.get( 'applied', default_value = None ) } ) )
+        context = {
+            'room': room,
+            'roomAPIURL': self.request.host_url + '/api/room/' + str( room.key() ),
+            'applied': self.request.get( 'applied', default_value = None )
+        }
+
+        if ( room.apiKey ):
+            context[ 'roomGithubPostbackURL' ] = self.request.host_url + '/api/room/' + str( room.key() ) + '/' + room.apiKey + '/github/'
+
+        self.response.out.write( template.render( 'templates/room_admin.html', context ) )
                                                     
     @LoginRequired
     def post( self, roomKey ):
