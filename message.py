@@ -111,6 +111,9 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
         else:
             account = get_account()
             roomlist = RoomList.all().filter('account =', account).filter('room =', room).get()
+            if not roomlist:
+                roomlist = RoomList( account = account, room = room )
+                roomlist.put()
             roomlist.update_presence()
             since_message_key = self.request.get('since')
             date_start = self.request.get('start')
