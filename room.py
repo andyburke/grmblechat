@@ -51,7 +51,12 @@ class RoomHandler(webapp.RequestHandler):
             self.error(404)
             self.response.out.write("no such room")
             return
+
         account = get_account()
+        if not account:
+            self.redirect('/account/')
+            return
+
         admin = RoomAdmin.all().filter( 'room = ', room ).filter( 'account =', account ).get()
         roomlist_query = RoomList.all()
         roomlist_query.filter('room = ', room)
