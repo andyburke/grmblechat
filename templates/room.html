@@ -21,8 +21,8 @@
 </script>
 
 <script type="text/html" id="user_list_entry_template">
-  <tr id="user-<%= sender.key %>">
-    <td><%= sender.gravatar_tag %> <%= nickname ? nickname : sender.nickname %></td>
+  <tr id="user-<%= key %>">
+    <td><%= gravatar_tag %> <%= nickname %></td>
   </tr>
 </script>
 
@@ -38,11 +38,8 @@
     <div>(<a href="/room/">return to lobby</a>)</div>
     <hr/>
     <table id="userlist">
-      {% for roomlisting in roomlist %}
-      <tr id="user-{{ roomlisting.account.key }}">
-        <td>{{ roomlisting.account.gravatar_tag }} <span id="user-nick-{{ roomlisting.account.nickname }}">{{ roomlisting.account.nickname }}</span></td>
+      <tr>
       </tr>
-      {% endfor %}
     </table>
 </div>
 

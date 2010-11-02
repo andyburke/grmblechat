@@ -25,10 +25,10 @@ class RoomAdmin( db.Model ):
     account = db.ReferenceProperty( reference_class = Account, required = True )
 
 class RoomList(db.Model):
-    account = db.ReferenceProperty(reference_class=Account, required=True)
-    room = db.ReferenceProperty(reference_class=Room, required=True)
-    status = db.StringProperty(default='')
-    last_seen = db.DateTimeProperty(auto_now_add=True, required=True)
+    account = db.ReferenceProperty( reference_class = Account, required = True )
+    room = db.ReferenceProperty( reference_class = Room, required = True )
+    status = db.StringProperty( default = '' )
+    last_seen = db.DateTimeProperty( auto_now_add = True, required = True )
     status = db.StringProperty( default = '' )
     status_start = db.DateTimeProperty()
 

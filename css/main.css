@@ -138,8 +138,8 @@ h3#room-users {
 }
 
 .edit {
-    background: url(/images/page_white_edit.png) no-repeat;
-    padding-left: 20px;
+    background: url(/images/page_white_edit.png) no-repeat right top;
+    padding-right: 20px;
     font-weight: bold;
     display: inline-block;
 }

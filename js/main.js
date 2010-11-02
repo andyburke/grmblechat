@@ -1,7 +1,10 @@
+
 var chat = function() {
 
     // private
     var KEY_TAB = 9;
+
+    var userlistUpdateInterval = 1000 * 60;
 
     var update_interval_min = 1000;
     var update_interval_max = 1000 * 60;
@@ -13,6 +16,9 @@ var chat = function() {
 
     this.room = null;
     this.account = null;
+    this.users = [];
+    this.templateSystem = null;
+
     var url_message_next;
     var $chatlog;
     var $text_entry_content;
@@ -197,9 +203,9 @@ var chat = function() {
             }
         }
 
-        function error()
+        function error( request, status, error )
         {
-            alert( 'failure' );
+            alert( "Failed to send message:\n\n" + error );
             do_polling = true;
         }
 
@@ -216,6 +222,33 @@ var chat = function() {
             error: error,
         });
         return false;
+    }
+
+    this.updateUsers = function()
+    {
+        function success( data )
+        {
+            $.each( data, function( index, roomlist )
+            {
+                var $adduser = 'user-' + roomlist.account.key;
+                if ( $("#" + $adduser).length == 0 )
+                {
+                    $('#userlist tr:last').after( chat.templateSystem.render( 'user_list_entry_template', roomlist.account ) ).fadeTo( 'slow', roomlist.account.status == 'idle' ? 0.5 : 1.0 );
+                }
+            });
+        }
+
+        function error( request, status, error )
+        {
+            alert( "Failed to retrieve user list:\n\n" + error );
+        }
+
+        $.ajax({
+            url: '/api/room/' + this.room.key + '/users/',
+            dataType: 'json',
+            success: success,
+            error: error,
+        });
     }
 
     function updateChat()
@@ -334,6 +367,7 @@ var chat = function() {
         // initialize "statics"
         this.room = the_room;
         this.account = the_account;
+        this.templateSystem = new TemplateSystem();
         url_message_next = '/api/room/' + this.room.key + '/msg/?since=';
         $chatlog = $('#chatlog');
         $text_entry_content = $('#text-entry-content');
@@ -368,6 +402,9 @@ var chat = function() {
         $(document).bind( "idle.idleTimer", OnIdle );
         $(document).bind( "active.idleTimer", OnUnidle );
         $.idleTimer( idleTime );
+
+        // populate our user list
+        updateUsers();
 
         // start the update loop rolling
         setTimeout( updateChat );

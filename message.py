@@ -86,6 +86,14 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
             message = Message( nickname = sender.nickname, sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
             message.put()
 
+            if ( message.type == 'idle' or message.type == 'active' ):
+                roomlist = RoomList.all().filter( 'room =', room ).filter( 'account =', sender ).get()
+                if ( not roomlist ):
+                    roomlist = RoomList( room = room, account = account )
+                roomlist.status = message.type
+                roomlist.status_start = timestamp
+                roomlist.put()
+
         if ( message ):
 
             message = to_dict( message ) # populates the key field for us
