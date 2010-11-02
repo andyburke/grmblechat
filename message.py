@@ -18,16 +18,16 @@ class MessageCollectionHandler(webapp.RequestHandler):
 
     def post(self, room_key):
         user = users.get_current_user()
-        sender = Account.all().filter('user =', user).get()
+        account = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         timestamp = datetime.now()
         content = self.request.get('content')
-        if not sender:
+        if not account:
             # no account for this user
             self.response.out.write(template.render('templates/account_create.html', None))
         elif len(content):
             # only create message if content is not empty
-            message = Message( sender = sender, room = room, timestamp = timestamp, content = content, type = 'message')
+            message = Message( sender = account, room = room, timestamp = timestamp, content = content, type = 'message')
             message.put()
         self.redirect('/room/' + room_key)
 
@@ -51,7 +51,7 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
 
     def post( self, room_key ):
         user = users.get_current_user()
-        sender = Account.all().filter('user =', user).get()
+        account = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         timestamp = datetime.now()
 
@@ -62,7 +62,7 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
             return
 
         payload = { 'response_status' : 'Programming error.' }
-        if ( not 'apiKey' in clientMessage ) and not sender:
+        if ( not 'apiKey' in clientMessage ) and not account:
             # no account for this user
             payload = { 'response_status' : "No Account Found" }
         
@@ -74,7 +74,7 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
             
             elif ( room.apiKey == clientMessage[ 'apiKey' ] ):
                 try:
-                    message = Message( nickname = clientMessage[ 'nickname' ], sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
+                    message = Message( nickname = clientMessage[ 'nickname' ], sender = account, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
                     message.put()
                 except Exception, e:
                     payload = { 'response_status' : 'Could not insert message into database: ' + str( e ) }
@@ -83,11 +83,11 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
                 payload = { 'response_status': 'Invalid apiKey for room.' }
 
         else:
-            message = Message( nickname = sender.nickname, sender = sender, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
+            message = Message( nickname = account.nickname, sender = account, room = room, timestamp = timestamp, content = clientMessage[ 'content' ], type = clientMessage[ 'type' ] )
             message.put()
 
             if ( message.type == 'idle' or message.type == 'active' ):
-                roomlist = RoomList.all().filter( 'room =', room ).filter( 'account =', sender ).get()
+                roomlist = RoomList.all().filter( 'room =', room ).filter( 'account =', account ).get()
                 if ( not roomlist ):
                     roomlist = RoomList( room = room, account = account )
                 roomlist.status = message.type
@@ -181,10 +181,10 @@ class TopicHandler(webapp.RequestHandler):
 
     def post(self, room_key):
         user = users.get_current_user()
-        sender = Account.all().filter('user =', user).get()
+        account = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         topic = self.request.get('topic')
-        if not sender:
+        if not account:
             # no account for this user
             self.response.out.write(template.render('templates/account_create.html', None))
         elif len(topic):
@@ -196,20 +196,20 @@ class APITopicHandler(webapp.RequestHandler):
 
     def post(self, room_key):
         user = users.get_current_user()
-        sender = Account.all().filter('user =', user).get()
+        account = Account.all().filter('user =', user).get()
         room = Room.all().filter('__key__ =', Key(room_key)).get()
         topic = self.request.get('topic')
         timestamp = datetime.now()
         #content = self.request.get('message')
         payload = {}
-        if not sender:
+        if not account:
             # no account for this user
             payload = {'response_status' : "No Account Found"}
         elif len(topic):
             # only create message if topic is not empty
             room.topic = topic
             room.put()
-            message = Message( sender = sender, room = room, timestamp = timestamp, content = topic, type = 'topic' )
+            message = Message( sender = account, room = room, timestamp = timestamp, content = topic, type = 'topic' )
             message.put()
             payload = {'response_status' : "OK", 'message' : topic, 'timestamp' : timestamp.isoformat()}
         else:
