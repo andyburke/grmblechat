@@ -45,7 +45,7 @@ def leave_room(room=None, account=None, session=None):
 
     # send a message to the room about the part
     timestamp = datetime.datetime.now()
-    message = Message( nickname = sender.nickname, sender = account, room = room, timestamp = timestamp, type = 'part' )
+    message = Message( nickname = account.nickname, sender = account, room = room, timestamp = timestamp, type = 'part' )
     message.put()
 
 

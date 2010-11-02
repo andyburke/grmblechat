@@ -55,10 +55,12 @@ class RoomHandler(webapp.RequestHandler):
     def get(self, room_key):
         room = Room.all().filter('slug =', room_key).get()
         if not room:
-            # room doesn't exist
-            self.error(404)
-            self.response.out.write("no such room")
-            return
+            room = Room.all().filter( '__key__ =', Key( room_key ) ).get()
+            if not room:
+                # room doesn't exist
+                self.error(404)
+                self.response.out.write("no such room")
+                return
 
         account = get_account()
         if not account:
