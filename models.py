@@ -9,7 +9,8 @@ class Account( db.Model ):
     nickname = db.StringProperty(required=True)
     url = db.StringProperty(default='')
     gravatar_tag = db.StringProperty(default='')    
-
+    playSoundsOnMessagesWhenIdle = db.BooleanProperty( default = True )
+    playSoundsOnDirectMessagesWhenIdle = db.BooleanProperty( default = True )
 
 class Room( db.Model ):
     name = db.StringProperty(required=True)

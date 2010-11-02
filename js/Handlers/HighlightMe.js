@@ -1,8 +1,9 @@
 var HighlightMeHandler = function()
 {
-    this.types = [ 'message' ];
+    this.types = [ 'message', 'idle', 'active' ];
     this.priority = -101;
 
+    var isIdle = false;
     var soundURL = '/sounds/direct_message.wav';
     var lastSoundPlayTime = new Date();
     var minTimeBetweenSoundPlays = 5000; // 5 seconds
@@ -19,18 +20,40 @@ var HighlightMeHandler = function()
         'background-color': '#DDF'
         });
 
-        if ( msg.content.match( userRegexp ) )
+        switch( msg.type )
         {
-            var now = new Date();
-
-            // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
-            //        if there's ever a fix for that, we should remove this browser check
-            if ( !$.browser.mozilla )
+        case 'idle':
+            if ( msg.sender.key == chat.account.key )
             {
-                if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                isIdle = true;
+            }
+            break;
+        case 'active':
+            if ( msg.sender.key == chat.account.key )
+            {
+                isIdle = false;
+            }
+            break;
+        case 'message':
+        default:
+            break;
+        }
+
+        if ( chat.account.playSoundsOnDirectMessagesWhenIdle && isIdle )
+        {
+            if ( msg.content.match( userRegexp ) )
+            {
+                var now = new Date();
+
+                // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
+                //        if there's ever a fix for that, we should remove this browser check
+                if ( !$.browser.mozilla )
                 {
-                    $.sound.play( soundURL );
-                    lastSoundPlayTime = now;
+                    if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                    {
+                        $.sound.play( soundURL );
+                        lastSoundPlayTime = now;
+                    }
                 }
             }
         }

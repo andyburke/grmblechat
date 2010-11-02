@@ -52,16 +52,20 @@ var IdleNotifications = function()
             {
                 var now = new Date();
 
-                // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
-                //        if there's ever a fix for that, we should remove this browser check
-                if ( !$.browser.mozilla )
+                if ( chat.account.playSoundsOnMessagesWhenIdle )
                 {
-                    if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                    // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
+                    //        if there's ever a fix for that, we should remove this browser check
+                    if ( !$.browser.mozilla )
                     {
-                        $.sound.play( soundURL );
-                        lastSoundPlayTime = now;
+                        if ( now - lastSoundPlayTime > minTimeBetweenSoundPlays )
+                        {
+                            $.sound.play( soundURL );
+                            lastSoundPlayTime = now;
+                        }
                     }
                 }
+                
                 ++missedMessageCount;
                 document.title = '(' + missedMessageCount + ') ' + chat.room.name + ': ' + chat.room.topic;
             

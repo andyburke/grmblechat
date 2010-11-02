@@ -9,6 +9,10 @@ handlers:
   script: account.py
   login: required
 
+- url: /api/account/[^/]*
+  script: account.py
+  login: required
+
 - url: /room/[^/]*
   script: room.py
   login: required

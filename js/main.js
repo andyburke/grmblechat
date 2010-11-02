@@ -224,6 +224,26 @@ var chat = function() {
         return false;
     }
 
+    this.updateAccount = function()
+    {
+        function success( data )
+        {
+            this.chat.account = data;
+        }
+
+        function error( request, status, error )
+        {
+            alert( "Failed to retrieve account info:\n\n" + error );
+        }
+
+        $.ajax({
+            url: '/api/account/' + this.chat.account.key,
+            dataType: 'json',
+            success: success,
+            error: error,
+        });
+    }
+
     this.updateUsers = function()
     {
         function success( data )

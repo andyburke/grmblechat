@@ -80,9 +80,20 @@
     content: 'left the room';
 }
 
-#sidebar {
+#settings {
     position: fixed;
     top: 0;
+    right: 0;
+    width: 18%;
+    padding: .5%;
+    background: #e0e0e0;
+    text-align: right;
+    font-weight: bold;
+}
+
+#sidebar {
+    position: fixed;
+    top: 3.0em;
     right: 0;
     width: 18%;
     padding: .5%;
