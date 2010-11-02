@@ -7,6 +7,7 @@ from datetime import datetime
 
 from models import *
 from utils import *
+import re
 
 from django.utils import simplejson
 
@@ -16,8 +17,10 @@ class RoomCollectionHandler(webapp.RequestHandler):
     @LoginRequired
     def get(self):
         rooms = Room.all().order('name')
+        roomlist = RoomList.all()
         self.response.out.write(template.render('templates/room_collection.html',
-                                                {'rooms': rooms}
+                                                {'rooms': rooms, 
+                                                 'roomlist': roomlist}
                                                 ))
     @LoginRequired
     def post(self):
@@ -27,25 +30,30 @@ class RoomCollectionHandler(webapp.RequestHandler):
             self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have an account!' } ) )
             return
 
-        name = self.request.get('name')
-        room = Room.all().filter('name =', name).get()
-        if room:
-            self.response.out.write(template.render('templates/room_collection.html',
-                                                    {'error_msg': 'A room by that name already exists.',
-                                                     'name': name}
-                                                    ))
-            return
+#FIXME: emit a warning when you make a room that already exists
 
-        room = Room( name = name )
+        name = self.request.get( 'name' )
+        slug = name.lower()
+        slug = re.sub(r'\W+', '', slug)
+        room = Room.all().filter( 'slug =', slug ).get()
+        i = 1
+        while room:
+            slug = slug + str( i )
+            room = Room.all().filter( 'slug =', slug ).get()
+            i += 1
+        room = Room( name = name, slug = slug, description = self.request.get( 'description' ) )
         room.put()
+
         RoomAdmin( room = room, account = account ).put() # make the creator an admin
-        self.redirect( '/room/' + str( room.key() ) )
+
+        self.redirect('/room/' + slug)
+            
 
 class RoomHandler(webapp.RequestHandler):
 
     @LoginRequired
     def get(self, room_key):
-        room = Room.all().filter('__key__ =', Key(room_key)).get()
+        room = Room.all().filter('slug =', room_key).get()
         if not room:
             # room doesn't exist
             self.error(404)
@@ -68,7 +76,7 @@ class RoomHandler(webapp.RequestHandler):
             #send a message to update everyone elses contact list
             user = users.get_current_user()
             timestamp = datetime.now()
-            message = Message( sender = account, room = room, timestamp = timestamp, type = 'join' )
+            message = Message( nickname = account.nickname, sender = account, room = room, timestamp = timestamp, type = 'join' )
             message.put()
             
         roomlist = RoomList.all().filter('room = ', room)
@@ -104,7 +112,16 @@ class AdminHandler( webapp.RequestHandler ):
             self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have admin priveledges for this room.' } ) )
             return
 
-        self.response.out.write( template.render( 'templates/room_admin.html', { 'room': room, 'roomAPIURL': self.request.host_url + '/api/room/' + str( room.key() ), 'applied': self.request.get( 'applied', default_value = None ) } ) )
+        context = {
+            'room': room,
+            'roomAPIURL': self.request.host_url + '/api/room/' + str( room.key() ),
+            'applied': self.request.get( 'applied', default_value = None )
+        }
+
+        if ( room.apiKey ):
+            context[ 'roomGithubPostbackURL' ] = self.request.host_url + '/api/room/' + str( room.key() ) + '/' + room.apiKey + '/github/'
+
+        self.response.out.write( template.render( 'templates/room_admin.html', context ) )
                                                     
     @LoginRequired
     def post( self, roomKey ):

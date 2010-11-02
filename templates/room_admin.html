@@ -36,6 +36,8 @@ window.onload = function () {
     API Key: <input id="room-apiKey-entry" type="text" size="100" name="roomApiKey" value="{{ room.apiKey }}"/>
     <input id="generate-apiKey-button" name="generateApiKeyButton" type="button" value="Generate" onClick="generateKey();" />
     <br/>
+    GitHub postback URL: <input id="room-githubPostback-entry" type="text" size="100" name="roomGitHubPostbackURL" value="{{ roomGithubPostbackURL }}" readonly style="background-color: #CCCCCC"/>
+    <br/>
     Public: <input id="public-entry" name="public" type="checkbox" value="True" {% if room.public %} checked {% endif %} />
     <br/>
     Invite Only: <input id="invite-only-entry" name="invite" type="checkbox" value="True" {% if room.invite %} checked {% endif %} />

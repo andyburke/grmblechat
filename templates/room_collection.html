@@ -4,21 +4,34 @@
 
 
     <h2>Rooms</h2>
-
-    <h3>Existing rooms</h3>
-
-    <table>
-      <tr>
-        <th style="padding-right: 1em;">Name</th>
-        <th>Topic</th>
-      </tr>
-      {% for room in rooms %}
-      <tr>
-        <td><a href="/room/{{ room.key }}">{{ room.name }}</a></td>
-        <td>{{ room.topic }}</td>
-      </tr>
-      {% endfor %}
+    {% for room in rooms %}
+	<span>
+    <table id="rounded-corner">
+      <thead>
+	    <tr>
+          <th scope="col" class="rounded-roomname"><a href="/room/{% firstof room.slug room.key %}">{{ room.name }}</a></th>
+          <th scope="col" class="rounded-topic">{{ room.topic }}</th>
+		</tr>
+	  </thead>
+	  <tfoot>
+	  <tr>
+	  <td colspan="1" class="rounded-foot-left">Last Activity: </td>
+	  <td class="rounded-foot-right">&nbsp;</td>
+	  </tr>
+	  </tfoot>
+	  <tr class="roomusers">
+		<td class="roomuserlist">
+		{% for roomlisting in roomlist %}
+		{% ifequal roomlisting.room.key room.key %}
+		<ul>{{ roomlisting.account.nickname }}</ul>
+		{% endifequal %}
+		{% endfor %}
+		</td>
+		<td class="roomblank">&nbsp;</td>
+	  </tr>
     </table>
+	</span>
+    {% endfor %}
 
     <h3>Create a new room</h3>
 

@@ -12,7 +12,7 @@
           <%= friendlyTimestamp %>
       </td>
       <td class="msg-sender">
-        <%= nickname %>
+        <%= nickname ? nickname : sender.nickname %>
       </td>
       <td class="msg-content">
         <%= content %>
@@ -22,14 +22,14 @@
 
 <script type="text/html" id="user_list_entry_template">
   <tr id="user-<%= sender.key %>">
-    <td><%= sender.gravatar_tag %> <%= sender.nickname %></td>
+    <td><%= sender.gravatar_tag %> <%= nickname ? nickname : sender.nickname %></td>
   </tr>
 </script>
 
 <div id="sidebar">
     <div id="channel-description">
-      <div class="room-name" style="display: inline-block;">{{ room.name }}</div>
-      :&nbsp;<div id="room-topic" class="edit" style="font-weight: bold; display: inline-block;">{{ room.topic }}</div>
+      <div class="room-name">{{ room.name }}</div>
+      :&nbsp;<div id="room-topic" class="edit">{{ room.topic }}</div>
       {% if admin %}
         <br/>
         <a href="/room/{{ room.key }}/admin">admin</a>

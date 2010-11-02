@@ -111,12 +111,14 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
         else:
             account = get_account()
             roomlist = RoomList.all().filter('account =', account).filter('room =', room).get()
+            if not roomlist:
+                roomlist = RoomList( account = account, room = room )
+                roomlist.put()
             roomlist.update_presence()
             since_message_key = self.request.get('since')
             date_start = self.request.get('start')
             date_end = self.request.get('end')
             query_terms = self.request.get('q')
-            messages = Message.all().filter('room =', room).order('timestamp')
             next_url = None
             if since_message_key != '':
                 # restrict by newer than message (specified by key)
@@ -124,7 +126,7 @@ class APIMessageCollectionHandler( webapp.RequestHandler ):
                 #   a new column populated by a counter (sharded?)
                 since_message = Message.all().filter('__key__ =', Key(since_message_key)).get()
                 # need to enumerate query results to access last message
-                messages = [m for m in messages.filter('timestamp >', since_message.timestamp)]
+                messages = [m for m in Message.all().filter( 'room =', room ).filter( 'timestamp >', since_message.timestamp ).order('timestamp')]
                 if messages:
                     next_url = 'room/%s/msg/?since=%s' % (room.key(), messages[-1].key())
 

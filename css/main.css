@@ -89,13 +89,24 @@
     background: #f0f0f0;
 }
 
+.room-name {
+    line-height: 1.2;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 200%;
+    display: inline-block;    
+}
+
 #room-topic {
     line-height: 1.2;
 }
 
+h3#room-users {
+    margin-bottom: .5em;
+}
+
 #userlist {
     font-size: 120%;
-    font-weight: bold;
 }
 
 #userlist img {
@@ -127,13 +138,55 @@
 }
 
 .edit {
-    background: url(/images/page_white_edit.png) no-repeat right top;
-    padding-right: 20px;
+    background: url(/images/page_white_edit.png) no-repeat;
+    padding-left: 20px;
+    font-weight: bold;
+    display: inline-block;
 }
 
-.room-name
-{
-    font-size: 300%;
-    font-weight: bold;
-    text-decoration: underline;
+#rounded-corner {
+    font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size:12px;
+    width:300px;
+    text-align:left;
+    border-collapse:collapse;
+    margin:20px;
+}
+
+#rounded-corner thead th.rounded-roomname {
+    border-top-left-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+}
+
+#rounded-corner thead th.rounded-topic {
+    border-top-right-radius: 10px;
+    -moz-border-radius-topright: 10px;
+}
+
+#rounded-corner th {
+    font-weight:normal;
+    font-size:13px;
+    color:#039;
+    background:#b9c9fe;
+    padding:8px;
+}
+
+#rounded-corner td{ 
+    background:#e8edff;
+    border-top:1px solid #fff;
+    color:#669;
+    padding:8px;
+}
+
+#rounded-corner tfoot td.rounded-foot-left {
+    border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomleft: 10px;
+}
+
+#rounded-corner tfoot td.rounded-foot-right {
+    border-bottom-right-radius: 10px;
+    -moz-border-radius-bottomright: 10px;
+}
+#rounded-corner tbody tr:hover td {
+    background:#d0dafd;
 }
