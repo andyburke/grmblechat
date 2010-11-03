@@ -157,37 +157,11 @@ class LeaveHandler( webapp.RequestHandler ):
         leave_room( room = room, account = account )
         self.redirect( '/room/' )
 
-class APIUsersHandler( webapp.RequestHandler ):
-    
-    def get( self, roomKey ):
-        room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
-        account = get_account()
-
-        if ( not room ):
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % roomKey } ) )
-            return
-
-        if ( not account ):
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not validate your account' } ) )
-            return
-
-        roomlist = RoomList.all().filter( 'account =', account ).filter( 'room =', room ).get()
-
-        if ( not roomlist ):
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'You are not in this room.' } ) )
-            return
-
-        roomlist = RoomList.all().filter( 'room =', room )
-        payload = [ to_dict( rl ) for rl in roomlist ]
-        self.response.out.write( simplejson.dumps( payload ) )
-
-
 application = webapp.WSGIApplication([
                                         ( '/room/', RoomCollectionHandler ),
                                         ( r'/room/([^/]+)', RoomHandler ),
                                         ( r'/room/([^/]+)/admin', AdminHandler ),
                                         ( r'/room/([^/]+)/leave', LeaveHandler ),
-                                        ( r'/api/room/([^/]+)/users/', APIUsersHandler ),
                                       ],
                                      debug=True)
 

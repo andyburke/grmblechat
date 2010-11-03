@@ -1,4 +1,4 @@
-var AudioHandler = function()
+function AudioHandler()
 {
     this.types = [ 'message' ];
     this.priority = 10;

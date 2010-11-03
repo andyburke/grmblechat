@@ -1,4 +1,4 @@
-var YoutubeHandler = function()
+function YoutubeHandler( grmbleChat )
 {
     this.types = [ 'message' ];
     this.priority = 100;

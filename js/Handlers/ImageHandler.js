@@ -1,4 +1,4 @@
-var ImageHandler = function()
+function ImageHandler( grmbleChat )
 {
     this.types = [ 'message' ];
     this.priority = 10;

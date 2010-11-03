@@ -5,11 +5,13 @@ api_version: 1
 
 handlers:
 
-- url: /account/[^/]*
-  script: account.py
-  login: required
+- url: /api/room/[^/]+/[^/]+/github/
+  script: github.py
 
-- url: /api/account/[^/]*
+- url: /api/.*
+  script: api.py
+
+- url: /account/[^/]*
   script: account.py
   login: required
 
@@ -24,31 +26,6 @@ handlers:
 - url: /room/[^/]+/leave
   script: room.py
   login: required
-
-- url: /api/room/[^/]+/users/
-  script: room.py
-  login: required
-
-- url: /room/[^/]+/msg
-  script: message.py
-  login: required
-
-- url: /room/[^/]+/topic
-  script: message.py
-  login: required
-
-- url: /api/room/[^/]+/topic
-  script: message.py
-  login: required
-  
-- url: /api/room/[^/]+/msg/[^/]*
-  script: message.py
-
-- url: /api/room/[^/]+/msg/
-  script: message.py
-
-- url: /api/room/[^/]+/[^/]+/github/
-  script: github.py
 
 - url: /tasks/.*
   script: tasks.py
@@ -69,11 +46,10 @@ handlers:
 - url: /sounds
   static_dir: sounds
   expiration: 1d
-  
+
 - url: /favicon.ico
   static_files: images/favicon.ico
   upload: images/favicon.ico
-
 
 - url: .*
   script: main.py

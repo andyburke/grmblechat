@@ -25,12 +25,16 @@ class RoomAdmin( db.Model ):
     room = db.ReferenceProperty( reference_class = Room, required = True )
     account = db.ReferenceProperty( reference_class = Account, required = True )
 
+class RoomInvite( db.Model ):
+    room = db.ReferenceProperty( reference_class = Room, required = True )
+    account = db.ReferenceProperty( reference_class = Account, required = True )
+
 class RoomList(db.Model):
     account = db.ReferenceProperty( reference_class = Account, required = True )
     room = db.ReferenceProperty( reference_class = Room, required = True )
     last_seen = db.DateTimeProperty( auto_now_add = True, required = True )
-    status = db.StringProperty( default = '' )
-    status_start = db.DateTimeProperty()
+    status = db.StringProperty( default = 'active' )
+    status_start = db.DateTimeProperty( auto_now_add = True )
 
     def update_presence(self):
         self.last_seen = datetime.now()

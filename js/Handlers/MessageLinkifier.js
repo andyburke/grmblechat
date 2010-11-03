@@ -1,4 +1,4 @@
-var MessageLinkifier = function()
+function MessageLinkifier( grmbleChat )
 {
     this.types = [ 'message' ];
     this.priority = 0;

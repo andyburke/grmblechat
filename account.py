@@ -73,26 +73,9 @@ class AccountHandler(webapp.RequestHandler):
 
         self.redirect( '/account/' + str( account.key() ) + '?applied=1' )
 
-class APIAccountHandler( webapp.RequestHandler ):
-
-    @LoginRequired
-    def get( self, accountKey ):
-        account = get_account()
-        targetAccount = Account.all().filter('__key__ =', Key( accountKey ) ).get()
-        if not targetAccount:
-            # account doesn't exist
-            self.error(404)
-            self.response.out.write("no such account")
-
-        if account.key() != targetAccount.key():
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'You do not have permission to modify this account!' } ) )
-            return
-
-        self.response.out.write( simplejson.dumps( to_dict( account ) ) )
 
 application = webapp.WSGIApplication([('/account/', AccountCollectionHandler),
-                                      (r'/account/([^/]+)', AccountHandler),
-                                      (r'/api/account/([^/]+)', APIAccountHandler)],
+                                      (r'/account/([^/]+)', AccountHandler),],
                                      debug=True)
 
 

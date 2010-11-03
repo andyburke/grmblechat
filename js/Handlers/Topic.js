@@ -1,12 +1,13 @@
-var TopicHandler = function()
+function TopicHandler( grmbleChat )
 {
+    this.grmbleChat = grmbleChat;
     this.types = [ 'topic' ];
     this.priority = 0;
     
     this.HandleMessage = function( msg )
     {
-        chat.room.topic = msg.content;
-        document.title = chat.room.name + ': ' + chat.room.topic;
+        this.grmbleChat.room.topic = msg.content;
+        document.title = this.grmbleChat.room.name + ': ' + this.grmbleChat.room.topic;
         $('#room-topic').text( msg.content );
 
         // are these synchronous?  if so, this isn't good to do this way

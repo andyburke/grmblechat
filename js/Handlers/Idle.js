@@ -1,4 +1,4 @@
-var IdleHandler = function()
+function IdleHandler( grmbleChat )
 {
     this.types = [ 'idle', 'active' ];
     this.priority = 0;

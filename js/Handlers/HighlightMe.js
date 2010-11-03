@@ -1,5 +1,6 @@
-var HighlightMeHandler = function()
+function HighlightMeHandler( grmbleChat )
 {
+    this.grmbleChat = grmbleChat;
     this.types = [ 'message', 'idle', 'active' ];
     this.priority = -101;
 
@@ -8,11 +9,11 @@ var HighlightMeHandler = function()
     var lastSoundPlayTime = new Date();
     var minTimeBetweenSoundPlays = 5000; // 5 seconds
 
-    var userRegexp = new RegExp( chat.account.nickname, "ig" );
+    var userRegexp = new RegExp( this.grmbleChat.account.nickname, "ig" );
 
     this.HandleMessage = function( msg )
     {
-        var messages = $(".msg-content:contains('" + chat.account.nickname + "')").add(".msg-content:contains('" + chat.account.nickname.toLowerCase() + "')");
+        var messages = $(".msg-content:contains('" + this.grmbleChat.account.nickname + "')").add(".msg-content:contains('" + this.grmbleChat.account.nickname.toLowerCase() + "')");
 
         messages.css({
         '-moz-box-shadow': '2px #44A',
@@ -23,13 +24,13 @@ var HighlightMeHandler = function()
         switch( msg.type )
         {
         case 'idle':
-            if ( msg.sender.key == chat.account.key )
+            if ( msg.sender.key == this.grmbleChat.account.key )
             {
                 isIdle = true;
             }
             break;
         case 'active':
-            if ( msg.sender.key == chat.account.key )
+            if ( msg.sender.key == this.grmbleChat.account.key )
             {
                 isIdle = false;
             }
@@ -39,7 +40,7 @@ var HighlightMeHandler = function()
             break;
         }
 
-        if ( chat.account.playSoundsOnDirectMessagesWhenIdle && isIdle )
+        if ( this.grmbleChat.account.playSoundsOnDirectMessagesWhenIdle && isIdle )
         {
             if ( msg.content.match( userRegexp ) )
             {
