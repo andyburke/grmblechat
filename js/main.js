@@ -434,9 +434,6 @@ var chat = function() {
 
     this.initialize = function( the_room, the_account )
     {
-        // hide our error bar
-        $('#errorBar').hide();
-
         // initialize "statics"
         this.room = the_room;
         this.account = the_account;
