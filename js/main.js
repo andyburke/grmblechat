@@ -244,7 +244,8 @@ var chat = function() {
 
         function error( request, status, error )
         {
-            alert( "Failed to send message:\n\n" + error );
+            $('#errorBar').html( 'An error has occured sending a message to the server.  You should probably reload.' );
+            $('#errorBar').slideDown( 'fast' );
             do_polling = true;
         }
 
@@ -272,7 +273,8 @@ var chat = function() {
 
         function error( request, status, error )
         {
-            alert( "Failed to retrieve account info:\n\n" + error );
+            $('#errorBar').html( 'An error has occured refreshing your account information.  You should probably reload.' );
+            $('#errorBar').slideDown( 'fast' );
         }
 
         $.ajax({
@@ -307,7 +309,8 @@ var chat = function() {
 
         function error( request, status, error )
         {
-            alert( "Failed to retrieve user list:\n\n" + error );
+            $('#errorBar').html( 'An error has occured updating the userlist.  You should probably reload.' );
+            $('#errorBar').slideDown( 'fast' );
         }
 
         $.ajax({
@@ -431,6 +434,9 @@ var chat = function() {
 
     this.initialize = function( the_room, the_account )
     {
+        // hide our error bar
+        $('#errorBar').hide();
+
         // initialize "statics"
         this.room = the_room;
         this.account = the_account;
