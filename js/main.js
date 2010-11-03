@@ -1,3 +1,44 @@
+var UserlistMaintainer = function()
+{
+    this.types = [ 'join', 'part' ];
+    this.priority = 0;
+    
+    this.HandleMessage = function( msg )
+    {
+        switch( msg.type )
+        {
+        case 'part':
+
+            if ( msg.sender.key != chat.account.key ) // don't remove ourselves on our old part messages
+            {
+                chat.nicknames = chat.nicknames.filter( function( element, index, array ) { return element != ( msg.nickname ? msg.nickname : msg.sender.nickname ); } )
+    
+                var $removeuser = 'user-' + msg.sender.key;
+                $("#" + $removeuser).fadeTo( 'slow', 0.0 );
+                $("#" + $removeuser).remove();
+            }
+            break;
+        case 'join':
+
+            // FIXME: these two tests are essentially the same (js array and userlist entry)
+
+            if ( !chat.nicknames.some( function checkElem( element, index, array ) { return ( element == ( msg.nickname ? msg.nickname : msg.sender.nickname ) ); } ) )
+            {
+                chat.nicknames.push( msg.nickname ? msg.nickname : msg.sender.nickname );
+            }
+            
+            var $adduser = 'user-' + msg.sender.key;
+            if ( $("#" + $adduser).length == 0 )
+            {
+                $('#userlist tr:last').after( chat.templateSystem.render( 'user_list_entry_template', msg.sender ? msg.sender : { 'nickname': msg.nickname } ) );
+            }
+            break;
+        default:
+            break;            
+        }
+    }
+}
+
 
 var chat = function() {
 
@@ -16,7 +57,7 @@ var chat = function() {
 
     this.room = null;
     this.account = null;
-    this.users = [];
+    this.nicknames = [];
     this.templateSystem = null;
 
     var url_message_next;
@@ -114,9 +155,7 @@ var chat = function() {
     {
         if ( event.which == KEY_TAB )
         {
-            // FIXME: this is an ass way to get the user list
-            var userlist = $('#userlist span').map( function() { return this.id.substr( 10 ) } );
-            autocompleteUsername( $(event.target), userlist );
+            autocompleteUsername( $(event.target), chat.nicknames );
             return false;
         }
     }
@@ -248,12 +287,20 @@ var chat = function() {
     {
         function success( data )
         {
+            chat.nicknames = [];
+
             $.each( data, function( index, roomlist )
             {
+                chat.nicknames.push( roomlist.account.nickname );
+
                 var $adduser = 'user-' + roomlist.account.key;
                 if ( $("#" + $adduser).length == 0 )
                 {
-                    $('#userlist tr:last').after( chat.templateSystem.render( 'user_list_entry_template', roomlist.account ) ).fadeTo( 'slow', roomlist.account.status == 'idle' ? 0.5 : 1.0 );
+                    $('#userlist tr:last').after( chat.templateSystem.render( 'user_list_entry_template', roomlist.account ) );
+                    if ( roomlist.status == 'idle' )
+                    {
+                        $('#userlist tr:last').fadeTo( 'fast', 0.5 );
+                    }
                 }
             });
         }
@@ -404,6 +451,7 @@ var chat = function() {
         $('#text-entry').submit( textEntrySubmit ).keydown( textEntryKeydown );
 
         // register our default handlers
+        RegisterHandler( new UserlistMaintainer() );
         RegisterHandler( new MessageLinkifier() );
         RegisterHandler( new YoutubeHandler() );
         RegisterHandler( new TopicHandler() );

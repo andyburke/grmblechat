@@ -1,6 +1,6 @@
 var MessageRenderer = function()
 {
-    this.types = [ 'message', 'join', 'part' ];
+    this.types = [ 'message', 'topic', 'join', 'part' ];
     this.priority = -100;
     
     var timestamp_display_format = 'g:i&\\n\\b\\s\\p;A';
@@ -11,10 +11,10 @@ var MessageRenderer = function()
         msg.friendlyTimestamp = new Date( msg.timestamp ).format( timestamp_display_format );
 
         var render = true;
-        
-        switch( msg.type )
+
+        // check for existing message and fix it up        
+        if ( msg.type == 'message' )
         {
-        case 'message':
             var $existingLocalMessage = $('#message-' + msg.clientKey );
             var $existingMessage = $('#message-' + msg.key );
             if ( $existingLocalMessage.length != 0 )
@@ -29,24 +29,6 @@ var MessageRenderer = function()
                 $existingMessage.find('.msg-content').html( msg.content ); // i guess in case the server does something to our content?
                 render = false;
             }
-            break;
-        case 'part':
-            if ( msg.sender.key != chat.account.key ) // don't remove ourselves on our old part messages
-            {
-                var $removeuser = 'user-' + msg.sender.key;
-                $("#" + $removeuser).fadeTo( 'slow', 0.0 );
-                $("#" + $removeuser).remove();
-            }
-            break;
-        case 'join':
-            var $adduser = 'user-' + msg.sender.key;
-            if ( $("#" + $adduser).length == 0 )
-            {
-                $('#userlist tr:last').after( chat.templateSystem.render( 'user_list_entry_template', msg.sender ? msg.sender : { 'nickname': msg.nickname } ) );
-            }
-            break;
-        default:
-            break;
         }
         
         if ( render )
