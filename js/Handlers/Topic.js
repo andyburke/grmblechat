@@ -6,8 +6,8 @@ function TopicHandler( grmbleChat )
     
     this.HandleMessage = function( msg )
     {
-        this.grmbleChat.room.topic = msg.content;
-        document.title = this.grmbleChat.room.name + ': ' + this.grmbleChat.room.topic;
+        this.grmbleChat.GetRoom().topic = msg.content;
+        document.title = this.grmbleChat.GetRoom().name + ': ' + this.grmbleChat.GetRoom().topic;
         $('#room-topic').text( msg.content );
 
         // are these synchronous?  if so, this isn't good to do this way

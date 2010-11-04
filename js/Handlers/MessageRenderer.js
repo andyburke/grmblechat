@@ -34,7 +34,7 @@ function MessageRenderer( grmbleChat )
         
         if ( render )
         {
-            html = this.grmbleChat.templateSystem.render( 'message_template', msg );
+            html = this.grmbleChat.GetTemplateSystem().render( 'message_template', msg );
             lastRow = $( '#chatlog tr:last' )
             if ( lastRow.length != 0 )
             {
@@ -47,7 +47,7 @@ function MessageRenderer( grmbleChat )
         }
         
         // FIXME: shouldn't do this if the user has scrolled the page, instead we should show that there are new messages somehow
-        this.grmbleChat.scrollToBottom();
+        this.grmbleChat.ScrollToBottom();
     };
 };
 

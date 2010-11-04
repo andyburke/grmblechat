@@ -34,17 +34,17 @@ function IdleNotifications( grmbleChat )
         switch( msg.type )
         {
         case 'idle':
-            if ( msg.sender.key == this.grmbleChat.account.key )
+            if ( msg.sender.key == this.grmbleChat.GetAccount().key )
             {
                 isIdle = true;
             }
             break;
         case 'active':
-            if ( msg.sender.key == this.grmbleChat.account.key )
+            if ( msg.sender.key == this.grmbleChat.GetAccount().key )
             {
                 isIdle = false;
                 missedMessageCount = 0;
-                document.title = this.grmbleChat.room.name + ': ' + this.grmbleChat.room.topic;
+                document.title = this.grmbleChat.GetRoom().name + ': ' + this.grmbleChat.GetRoom().topic;
             }
             break;
         case 'message':
@@ -53,7 +53,7 @@ function IdleNotifications( grmbleChat )
             {
                 var now = new Date();
 
-                if ( this.grmbleChat.account.playSoundsOnMessagesWhenIdle )
+                if ( this.grmbleChat.GetAccount().playSoundsOnMessagesWhenIdle )
                 {
                     // FIXME: playing sounds using this plugin will bring a mozilla window to the foreground,
                     //        if there's ever a fix for that, we should remove this browser check
@@ -68,7 +68,7 @@ function IdleNotifications( grmbleChat )
                 }
                 
                 ++missedMessageCount;
-                document.title = '(' + missedMessageCount + ') ' + this.grmbleChat.room.name + ': ' + this.grmbleChat.room.topic;
+                document.title = '(' + missedMessageCount + ') ' + this.grmbleChat.GetRoom().name + ': ' + this.grmbleChat.GetRoom().topic;
             
                 if ( animatingCallbackId == null )
                 {

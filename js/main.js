@@ -1,50 +1,6 @@
-function UserlistMaintainer( grmbleChat )
-{
-    this.grmbleChat = grmbleChat;
-    this.types = [ 'join', 'part' ];
-    this.priority = 0;
-    
-    this.HandleMessage = function( msg )
-    {
-        switch( msg.type )
-        {
-        case 'part':
-
-            if ( msg.sender.key != this.grmbleChat.account.key ) // don't remove ourselves on our old part messages
-            {
-                this.grmbleChat.nicknames = this.grmbleChat.nicknames.filter( function( element, index, array ) { return element != ( msg.nickname ? msg.nickname : msg.sender.nickname ); } )
-    
-                var $removeuser = 'user-' + msg.sender.key;
-                $("#" + $removeuser).fadeTo( 'slow', 0.0 );
-                $("#" + $removeuser).remove();
-            }
-            break;
-        case 'join':
-
-            // FIXME: these two tests are essentially the same (js array and userlist entry)
-
-            if ( !this.grmbleChat.nicknames.some( function checkElem( element, index, array ) { return ( element == ( msg.nickname ? msg.nickname : msg.sender.nickname ) ); } ) )
-            {
-                this.grmbleChat.nicknames.push( msg.nickname ? msg.nickname : msg.sender.nickname );
-            }
-            
-            var $adduser = 'user-' + msg.sender.key;
-            if ( $("#" + $adduser).length == 0 )
-            {
-                $('#userlist tr:last').after( this.grmbleChat.templateSystem.render( 'user_list_entry_template', msg.sender ? msg.sender : { 'nickname': msg.nickname } ) );
-            }
-            break;
-        default:
-            break;            
-        }
-    }
-}
-
 
 function GrmbleChat()
 {
-    var _this = this;
-
     // private
     var KEY_TAB = 9;
 
@@ -53,20 +9,17 @@ function GrmbleChat()
     var updateInterval_min = 1000;
     var updateInterval_max = 1000 * 60;
     var updateInterval_error = 1000 * 10;
-    this.updateInterval = updateInterval_min;
+    var updateInterval = updateInterval_min;
     var message_display_max = 70;
     var timestamp_iso8601_format = 'Y-m-d\TH:i:s';
     var do_polling = true;
 
-    this.room = null;
-    this.account = null;
-    this.nicknames = [];
-    this.templateSystem = null;
-    this.url_message_next = '';
+    var room = null;
+    var account = null;
+    var nicknames = [];
+    var templateSystem = null;
+    var url_message_next = '';
     var $chatlog;
-    var $text_entry_content;
-
-    var idleTime = 120000; // 2 minutes
 
     var messageHandlers = {
                                 'message': [],
@@ -76,6 +29,25 @@ function GrmbleChat()
                                 'join': [],
                                 'part': [],
                            };
+
+    this.GetNicknames = function() { return nicknames; }
+    this.GetUpdateInterval = function() { return updateInterval; }
+    this.GetTemplateSystem = function() { return templateSystem; }
+    this.GetAccount = function() { return account; }
+    this.GetRoom = function() { return room; }
+
+    this.RemoveNickname = function( nickname )
+    {
+        nicknames = nicknames.filter( function( element, index, array ) { return element != nickname; } );
+    }
+
+    this.AddNickname = function( nickname )
+    {
+        if ( !nicknames.some( function( element, index, array ) { return element == nickname; } ) )
+        {
+            nicknames.push( nickname );
+        }
+    }
 
     this.RegisterHandler = function( handler )
     {
@@ -120,7 +92,7 @@ function GrmbleChat()
         }
     };
 
-    this.Broadcast = function( broadcastMessage )
+    function Broadcast( broadcastMessage )
     {
         if ( typeof( messageHandlers[ broadcastMessage.type ] ) == 'undefined' )
         {
@@ -158,69 +130,7 @@ function GrmbleChat()
         }
     };
     
-    this.textEntrySubmit = function()
-    {
-        var msg = $text_entry_content.val();
-        if ( msg.length > 0 )
-        {
-            newMessage = _this.createMessage( 'message', msg );
-            _this.sendMessage( newMessage );
-            _this.Broadcast( newMessage ); // broadcast it locally so we see it right away, must
-                                     // be called after we sendMessage because message may
-                                     // be modified during broadcast (formatting, etc.)
-            
-            $text_entry_content.val('');
-            _this.updateInterval = updateInterval_min; // FIXME need to cancel pending update and retrigger it with this new interval
-        }
-        
-        return false;
-    }
-
-    this.textEntryKeydown = function( event )
-    {
-        if ( event.which == KEY_TAB )
-        {
-            autocompleteUsername( $(event.target), _this.nicknames );
-            return false;
-        }
-    }
-
-    // takes a text field and an array of strings for autocompletion
-    function autocompleteUsername( $input, names )
-    {
-        var value = $input.val();
-        var candidates = [];
-        var i;
-
-        // ensure we have text, no text is selected, and cursor is at end of text
-        if ( value.length > 0 && $input[0].selectionStart == $input[0].selectionEnd && $input[0].selectionStart == value.length)
-        {
-            // filter names to find only strings that start with existing value
-            for ( i = 0; i < names.length; i++)
-            {
-                if ( names[ i ].toLowerCase().indexOf( value.toLowerCase() ) == 0 && names[ i ].length >= value.length )
-                {
-                    candidates.push( names[ i ] );
-                }
-            }
-            if ( candidates.length > 0 )
-            {
-                // some candidates for autocompletion are found
-                if ( candidates.length == 1 )
-                {
-                    $input.val( candidates[0] + ': ' );
-                }
-                else
-                {
-                    $input.val( longestInCommon( candidates, value.length ) );
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    this.scrollToBottom = function()
+    this.ScrollToBottom = function()
     {
         // trim message list
         var $messages = $chatlog.find('.message:visible');
@@ -234,20 +144,30 @@ function GrmbleChat()
         $('body').scrollTop(dest); // FIXME this is a chromium workaround for bug #2891
     }
 
-    this.createMessage = function( type, messageContent )
+    function CreateMessage( type, messageContent )
     {
        return {
-                  'sender': _this.account,
-                  'nickname': _this.account.nickname,
+                  'sender': account,
+                  'nickname': account.nickname,
                   'timestamp': new Date().getTime(),
                   'content': messageContent,
                   'type': type,
-                  'room': _this.room,
+                  'room': room,
                   'key': new Date().getTime()
               };
     }
 
-    this.sendMessage = function( messageToSend )
+    this.CreateAndSendMessage = function( type, content )
+    {
+        newMessage = CreateMessage( type, content );
+        SendMessage( newMessage );
+        Broadcast( newMessage ); // broadcast it locally so we see it right away, must
+                                 // be called after we SendMessage because message may
+                                 // be modified during broadcast (formatting, etc.)
+        updateInterval = updateInterval_min; // FIXME need to cancel pending update and retrigger it with this new interval
+    }
+
+    function SendMessage( messageToSend )
     {
         function success( data )
         {
@@ -260,10 +180,10 @@ function GrmbleChat()
                 responseMessage = response[ 'message' ]
 
                 // rebroadcast it locally so we fix up our temp entry
-                _this.Broadcast( responseMessage );
+                Broadcast( responseMessage );
                 
                 // reset our next url
-                _this.url_message_next = response[ 'next' ];
+                url_message_next = response[ 'next' ];
             }
         }
 
@@ -275,7 +195,7 @@ function GrmbleChat()
         }
 
         // FIXME: we should even handle sending to the server with a Handler
-        var post_url = '/api/room/' + _this.room.key + '/msg/';
+        var post_url = '/api/room/' + room.key + '/msg/';
         do_polling = false;
         jsonMessage = $.toJSON( messageToSend )
         $.ajax(
@@ -289,12 +209,11 @@ function GrmbleChat()
         return false;
     }
 
-    this.updateAccount = function()
+    function UpdateAccount()
     {
-
         function success( data )
         {
-            _this.account = data;
+            account = data;
         }
 
         function error( request, status, error )
@@ -304,27 +223,27 @@ function GrmbleChat()
         }
 
         $.ajax({
-            url: '/api/account/' + _this.account.key,
+            url: '/api/account/' + account.key,
             dataType: 'json',
             success: success,
             error: error,
         });
     }
 
-    this.updateUsers = function()
+    function UpdateUsers()
     {
         function success( data )
         {
-            _this.nicknames = [];
+            nicknames = [];
 
             $.each( data, function( index, roomlist )
             {
-                _this.nicknames.push( roomlist.account.nickname );
+                nicknames.push( roomlist.account.nickname );
 
                 var $adduser = 'user-' + roomlist.account.key;
                 if ( $("#" + $adduser).length == 0 )
                 {
-                    $('#userlist tr:last').after( _this.templateSystem.render( 'user_list_entry_template', roomlist.account ) );
+                    $('#userlist tr:last').after( templateSystem.render( 'user_list_entry_template', roomlist.account ) );
                     if ( roomlist.status == 'idle' )
                     {
                         $('#userlist tr:last').fadeTo( 'fast', 0.5 );
@@ -340,21 +259,22 @@ function GrmbleChat()
         }
 
         $.ajax({
-            url: '/api/room/' + _this.room.key + '/users/',
+            url: '/api/room/' + room.key + '/users/',
             dataType: 'json',
             success: success,
             error: error,
         });
     }
 
-    this.joinRoom = function()
+    function JoinRoom()
     {
+
         function success( data )
         {
             if ( data[ 'response_status' ] == 'OK' )
             {
                 // populate our user list
-                _this.updateUsers();
+                UpdateUsers();
             }
             else
             {
@@ -370,7 +290,7 @@ function GrmbleChat()
         }
 
         $.ajax({
-            url: '/api/room/' + _this.room.key + '/join/',
+            url: '/api/room/' + room.key + '/join/',
             dataType: 'json',
             type: 'POST',
             success: success,
@@ -378,14 +298,14 @@ function GrmbleChat()
         });
     }
 
-    this.updateChat = function()
+    function UpdateChat()
     {
         function success( data )
         {
             if ( !data || !data[ 'messages'] || data[ 'messages' ].length <= 0 )
             {
                 // FIXME: we've temporarily changed the backoff from exponential to linear. + 2000 instead of * 2
-                _this.updateInterval = Math.min( _this.updateInterval + 2000, updateInterval_max );
+                updateInterval = Math.min( updateInterval + 2000, updateInterval_max );
                 return;
             }
 
@@ -395,7 +315,7 @@ function GrmbleChat()
                 $('#errorBar').slideDown( 'fast' );
 
                 // give the server/network/etc some time to settle before retrying
-                _this.updateInterval = updateInterval_error;
+                updateInterval = updateInterval_error;
                 return;
             }
 
@@ -403,88 +323,61 @@ function GrmbleChat()
 
             for ( messageIndex = 0; messageIndex < data[ 'messages' ].length; ++messageIndex )
             {
-                _this.Broadcast( data[ 'messages' ][ messageIndex ] );
+                Broadcast( data[ 'messages' ][ messageIndex ] );
             }
 
-            _this.updateInterval = updateInterval_min;
+            updateInterval = updateInterval_min;
                 
             if ( data[ 'next' ] )
             {
-                _this.url_message_next = data[ 'next' ];
+                url_message_next = data[ 'next' ];
             }
         }
 
         function error( request, status, error )
         {
             // give the server/network/etc some time to settle before retrying
-            _this.updateInterval = updateInterval_error;
+            updateInterval = updateInterval_error;
 
             $('#errorBar').html( 'An error occurred trying to get new messages from the server.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
         }
 
         $.ajax({
-            url: _this.url_message_next,
+            url: url_message_next,
             dataType: 'json',
             success: success,
             error: error,
         });
     }
-
-    // finds the longest common substring in the given data set.
-    // takes an array of strings and a starting index
-    function longestInCommon( candidates, index )
+ 
+    function Loop()
     {
-        var i, ch, memo;
+        UpdateChat();
 
-        do
+        if ( updateInterval > 0 )
         {
-            memo = null;
-            for (i = 0; i < candidates.length; i++)
-            {
-                ch = candidates[ i ].charAt( index );
-            
-                if ( !ch )
-                {
-                    break;
-                }
-	        
-                if ( !memo )
-                {
-                    memo = ch;
-                }
-                else if ( ch != memo )
-                {
-                    break;
-                }
-            }
-        } while ( i == candidates.length && ++index );
-
-        return candidates[ 0 ].slice( 0, index );
+            setTimeout( Loop, updateInterval );
+        }
     }
     
-    this.OnIdle = function()
+    this.Start = function()
     {
-        _this.sendMessage( _this.createMessage( 'idle', '' ) );
-    }
-    
-    this.OnUnidle = function()
-    {
-        _this.sendMessage( _this.createMessage( 'active', '' ) );
+        JoinRoom();
+        Loop();
     }
 
     this.initialize = function( the_room, the_account )
     {
         // initialize "statics"
-        this.room = the_room;
-        this.account = the_account;
-        this.templateSystem = new TemplateSystem();
-        _this.url_message_next = '/api/room/' + this.room.key + '/msg/?since=';
+        room = the_room;
+        account = the_account;
+        templateSystem = new TemplateSystem();
+        url_message_next = '/api/room/' + room.key + '/msg/?since=';
         $chatlog = $('#chatlog');
-        $text_entry_content = $('#text-entry-content');
 
         // apply jquery hooks and behaviors
-        $('#room-topic').editable('/api/room/' + this.room.key + '/topic/', {
+        $('#room-topic').editable('/api/room/' + room.key + '/topic/', {
             indicator   : 'Saving...',
             tooltip     : 'Click to edit',
             name        : 'topic',
@@ -503,15 +396,6 @@ function GrmbleChat()
         this.RegisterHandler( new AudioHandler( this ) );
         this.RegisterHandler( new ImageHandler( this ) );
         this.RegisterHandler( new HighlightMeHandler( this ) );
-
-        // prepare the window for user interaction
-        this.scrollToBottom();
-        $('#text-entry-content').focus();
-
-        // set up idle timer
-        $(document).bind( "idle.idleTimer", this.OnIdle );
-        $(document).bind( "active.idleTimer", this.OnUnidle );
-        $.idleTimer( idleTime );
     }
     
     return this;
@@ -524,21 +408,121 @@ Date.prototype.format=function(format){ format = typeof(format) == 'undefined' ?
 
 var g_GrmbleChat = null;
 
-function UpdateChat()
+function OnIdle()
 {
-    g_GrmbleChat.updateChat();
+    g_GrmbleChat.CreateAndSendMessage( 'idle', '' );
+}
+    
+function OnUnidle()
+{
+    g_GrmbleChat.CreateAndSendMessage( 'active', '' );
+}
 
-    if ( g_GrmbleChat.updateInterval > 0 )
+function textEntrySubmit()
+{
+    var msg = $('#text-entry-content').val();
+    if ( msg.length > 0 )
     {
-        setTimeout( UpdateChat, g_GrmbleChat.updateInterval );
+        g_GrmbleChat.CreateAndSendMessage( 'message', msg );        
+        $('#text-entry-content').val('');
+    }
+    
+    return false;
+}
+
+// finds the longest common substring in the given data set.
+// takes an array of strings and a starting index
+function longestInCommon( candidates, index )
+{
+    var i, ch, memo;
+
+    do
+    {
+        memo = null;
+        for (i = 0; i < candidates.length; i++)
+        {
+            ch = candidates[ i ].charAt( index );
+        
+            if ( !ch )
+            {
+                break;
+            }
+        
+            if ( !memo )
+            {
+                memo = ch;
+            }
+            else if ( ch != memo )
+            {
+                break;
+            }
+        }
+    } while ( i == candidates.length && ++index );
+
+    return candidates[ 0 ].slice( 0, index );
+}
+
+// takes a text field and an array of strings for autocompletion
+function autocompleteUsername( $input, names )
+{
+    var value = $input.val();
+    var candidates = [];
+    var i;
+
+    // ensure we have text, no text is selected, and cursor is at end of text
+    if ( value.length > 0 && $input[0].selectionStart == $input[0].selectionEnd && $input[0].selectionStart == value.length)
+    {
+        // filter names to find only strings that start with existing value
+        for ( i = 0; i < names.length; i++)
+        {
+            if ( names[ i ].toLowerCase().indexOf( value.toLowerCase() ) == 0 && names[ i ].length >= value.length )
+            {
+                candidates.push( names[ i ] );
+            }
+        }
+        if ( candidates.length > 0 )
+        {
+            // some candidates for autocompletion are found
+            if ( candidates.length == 1 )
+            {
+                $input.val( candidates[0] + ': ' );
+            }
+            else
+            {
+                $input.val( longestInCommon( candidates, value.length ) );
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+function textEntryKeydown( event )
+{
+    if ( event.which == KEY_TAB )
+    {
+        autocompleteUsername( $(event.target), g_GrmbleChat.GetNicknames() );
+        return false;
     }
 }
 
 StartChat = function( room, account )
 {
+    $('#text-entry').submit( textEntrySubmit ).keydown( textEntryKeydown );
+
+    // set up idle timer
+    $(document).bind( "idle.idleTimer", OnIdle );
+    $(document).bind( "active.idleTimer", OnUnidle );
+    $.idleTimer( 1000 * 60 * 2 ); // 2 minutes
+
+
     g_GrmbleChat = new GrmbleChat();
     g_GrmbleChat.initialize( room, account );
-    $('#text-entry').submit( g_GrmbleChat.textEntrySubmit ).keydown( g_GrmbleChat.textEntryKeydown );
-    g_GrmbleChat.joinRoom();
-    setTimeout( UpdateChat, g_GrmbleChat.updateInterval );
+
+    // prepare the window for user interaction
+    g_GrmbleChat.ScrollToBottom();
+    $('#text-entry-content').focus();
+
+    // start the update loop
+    g_GrmbleChat.Start();
 }
