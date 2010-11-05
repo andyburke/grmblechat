@@ -204,7 +204,7 @@ class MessageCollectionHandler( webapp.RequestHandler ):
         date_start = self.request.get('start')
         date_end = self.request.get('end')
         query_terms = self.request.get('q')
-        next_url = '/api/room/%s/msg/' % (room.key())
+        next_url = "%s?%s" % ( self.request.path, self.request.query_string )
 
         if since_message_key != '':
             # restrict by newer than message (specified by key)
