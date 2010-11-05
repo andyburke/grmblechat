@@ -10,12 +10,12 @@ function ImageHandler( grmbleChat )
             return;
         }
         
-        var image = msg.content.match( /(https?:\/\/.*?(png|jpg|gif))(?:\W|$)/ig );
+        var image = msg.content.match( /(https?:\/\/.*?\.(png|jpg|gif))(?:\W|$)/ig );
         if ( image && image.length )
         {
             $.each( image, function( i )
             {
-                msg.content = msg.content.replace( this, '<img src="' + this + '">' );
+                msg.content = msg.content.replace( this, '<img style="max-width: 90%" src="' + this + '">' );
             });
             
             msg.rawHTML = true;
