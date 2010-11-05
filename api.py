@@ -204,7 +204,7 @@ class MessageCollectionHandler( webapp.RequestHandler ):
         date_start = self.request.get('start')
         date_end = self.request.get('end')
         query_terms = self.request.get('q')
-        next_url = None
+        next_url = '/api/room/%s/msg/' % (room.key())
 
         if since_message_key != '':
             # restrict by newer than message (specified by key)
@@ -243,14 +243,11 @@ class MessageCollectionHandler( webapp.RequestHandler ):
                         logging.debug( 'Appended message of type \'%s\' to unlimited message query' % m.type )
                         nonIdleMessages.append( m )
                 messages = nonIdleMessages
-            else:
-                next_url = '/api/room/%s/msg/' % (room.key())
 
         payload = { 'response_status': 'OK', 'messages': [] }
         if messages:
             payload[ 'messages' ] = [ to_dict( m ) for m in messages ]
-            if next_url:
-                payload[ 'next' ] = next_url
+        payload[ 'next' ] = next_url
 
         json = simplejson.dumps( payload )
         self.response.out.write( json )

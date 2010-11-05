@@ -302,6 +302,11 @@ function GrmbleChat()
     {
         function success( data )
         {
+            if ( data && data[ 'next' ] )
+            {
+                url_message_next = data[ 'next' ];
+            }
+
             if ( !data || !data[ 'messages'] || data[ 'messages' ].length <= 0 )
             {
                 // FIXME: we've temporarily changed the backoff from exponential to linear. + 2000 instead of * 2
@@ -327,11 +332,6 @@ function GrmbleChat()
             }
 
             updateInterval = updateInterval_min;
-                
-            if ( data[ 'next' ] )
-            {
-                url_message_next = data[ 'next' ];
-            }
         }
 
         function error( request, status, error )
