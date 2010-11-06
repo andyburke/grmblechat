@@ -21,6 +21,8 @@ function GrmbleChat()
     var url_message_next = '';
     var $chatlog;
 
+    var m_Busy = false;
+
     var messageHandlers = {
                                 'message': [],
                                 'topic': [],
@@ -185,6 +187,8 @@ function GrmbleChat()
                 // reset our next url
                 url_message_next = response[ 'next' ];
             }
+
+            m_Busy = false;
         }
 
         function error( request, status, error )
@@ -192,7 +196,10 @@ function GrmbleChat()
             $('#errorBar').html( 'An error has occured sending a message to the server.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
             do_polling = true;
+            m_Busy = false;
         }
+
+        m_Busy = true;
 
         // FIXME: we should even handle sending to the server with a Handler
         var post_url = '/api/room/' + room.key + '/msg/';
@@ -214,14 +221,17 @@ function GrmbleChat()
         function success( data )
         {
             account = data;
+            m_Busy = false;
         }
 
         function error( request, status, error )
         {
             $('#errorBar').html( 'An error has occured refreshing your account information.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
+            m_Busy = false;
         }
 
+        m_Busy = true;
         $.ajax({
             url: '/api/account/' + account.key,
             dataType: 'json',
@@ -250,14 +260,18 @@ function GrmbleChat()
                     }
                 }
             });
+
+            m_Busy = false;
         }
 
         function error( request, status, error )
         {
             $('#errorBar').html( 'An error has occured updating the userlist.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
+            m_Busy = false;
         }
 
+        m_Busy = true;
         $.ajax({
             url: '/api/room/' + room.key + '/users/',
             dataType: 'json',
@@ -281,14 +295,17 @@ function GrmbleChat()
                 $('#errorBar').html( data[ 'response_status' ] );
                 $('#errorBar').slideDown( 'fast' );
             }
+            m_Busy = false;
         }
 
         function error( request, status, error )
         {
             $('#errorBar').html( 'An error occurred trying to join the room.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
+            m_Busy = false;
         }
 
+        m_Busy = true;
         $.ajax({
             url: '/api/room/' + room.key + '/join/',
             dataType: 'json',
@@ -311,6 +328,7 @@ function GrmbleChat()
             {
                 // FIXME: we've temporarily changed the backoff from exponential to linear. + 2000 instead of * 2
                 updateInterval = Math.min( updateInterval + 2000, updateInterval_max );
+                m_Busy = false;
                 return;
             }
 
@@ -321,6 +339,7 @@ function GrmbleChat()
 
                 // give the server/network/etc some time to settle before retrying
                 updateInterval = updateInterval_error;
+                m_Busy = false;
                 return;
             }
 
@@ -332,6 +351,7 @@ function GrmbleChat()
             }
 
             updateInterval = updateInterval_min;
+            m_Busy = false;
         }
 
         function error( request, status, error )
@@ -341,8 +361,10 @@ function GrmbleChat()
 
             $('#errorBar').html( 'An error occurred trying to get new messages from the server.  You should probably reload.' );
             $('#errorBar').slideDown( 'fast' );
+            m_Busy = false;
         }
 
+        m_Busy = true;
         $.ajax({
             url: url_message_next,
             dataType: 'json',
@@ -353,7 +375,10 @@ function GrmbleChat()
  
     function Loop()
     {
-        UpdateChat();
+        if ( !m_Busy )
+        {
+            UpdateChat();
+        }
 
         if ( updateInterval > 0 )
         {
