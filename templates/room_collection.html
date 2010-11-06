@@ -2,10 +2,16 @@
 
 {% block content %}
 
+    <form action="" method="post">
+      {% if error_msg %}
+      <p style="color: #ff0000;">{{ error_msg }}</p>
+      {% endif %}
+      <span style="font-size: 120%">New room:</span> <input type="text" name="name" value="{{ name }}"/> <input type="submit" value="Create"/>
+    </form>
 
     <h2>Rooms</h2>
     {% for room in rooms %}
-	<span>
+    <div style="float: left">
     <table id="rounded-corner">
       <thead>
 	    <tr>
@@ -19,28 +25,7 @@
 	  <td class="rounded-foot-right">&nbsp;</td>
 	  </tr>
 	  </tfoot>
-	  <tr class="roomusers">
-		<td class="roomuserlist">
-		{% for roomlisting in roomlist %}
-		{% ifequal roomlisting.room.key room.key %}
-		<ul>{{ roomlisting.account.nickname }}</ul>
-		{% endifequal %}
-		{% endfor %}
-		</td>
-		<td class="roomblank">&nbsp;</td>
-	  </tr>
     </table>
-	</span>
+    </div>
     {% endfor %}
-
-    <h3>Create a new room</h3>
-
-    <form action="" method="post">
-      {% if error_msg %}
-      <p style="color: #ff0000;">{{ error_msg }}</p>
-      {% endif %}
-      <p>Name: <input type="text" name="name" value="{{ name }}"/></p>
-      <p><input type="submit" value="Create Room"/></p>
-    </form>
-
 {% endblock %}
