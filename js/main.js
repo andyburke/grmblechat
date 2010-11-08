@@ -20,6 +20,7 @@ function GrmbleChat()
     var $chatlog;
 
     var m_Busy = false;
+    var m_GotInitialChatBundle = false;
 
     var messageHandlers = {
                                 'message': [],
@@ -312,6 +313,7 @@ function GrmbleChat()
 
     function UpdateChat()
     {
+
         function success( data )
         {
             if ( data && data[ 'next' ] )
@@ -346,6 +348,14 @@ function GrmbleChat()
             }
 
             updateInterval = updateInterval_min;
+
+            if ( !m_GotInitialChatBundle )
+            {
+                // we update the userlist again to clear out any 'dead joins'
+                UpdateUsers();
+                m_GotInitialChatBundle = true;
+            }
+
             m_Busy = false;
         }
 
@@ -384,8 +394,8 @@ function GrmbleChat()
     this.Start = function()
     {
         JoinRoom();
-        UpdateChat();
         UpdateUsers();
+        UpdateChat();
         Loop();
     }
 
