@@ -182,9 +182,6 @@ function GrmbleChat()
 
                 // rebroadcast it locally so we fix up our temp entry
                 Broadcast( responseMessage );
-                
-                // reset our next url
-                url_message_next = response[ 'next' ];
             }
 
             m_Busy = false;

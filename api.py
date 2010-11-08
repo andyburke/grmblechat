@@ -175,10 +175,11 @@ class MessageCollectionHandler( webapp.RequestHandler ):
         if ( 'key' in clientMessage ):
             message[ 'clientKey' ] = clientMessage[ 'key' ] # so the client can reset their local key
 
+        # do not update the 'next' url when posting a message, in case there were messages the client
+        # hasn't received between their last check and the message they just sent
         payload = {
                     'response_status' : "OK",
                     'message' : message,
-                    'next' : '/api/room/%s/msg/?since=%s' % ( room.key(), message[ 'key' ] )
                   }
                       
         json = simplejson.dumps(payload)
