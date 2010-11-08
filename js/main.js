@@ -2,8 +2,6 @@
 function GrmbleChat()
 {
     // private
-    var KEY_TAB = 9;
-
     var userlistUpdateInterval = 1000 * 60;
 
     var updateInterval_min = 1000;
@@ -412,6 +410,7 @@ function GrmbleChat()
         
         // register our default handlers
         this.RegisterHandler( new UserlistMaintainer( this ) );
+        this.RegisterHandler( new MessageLinkFinder( this ) );
         this.RegisterHandler( new MessageLinkifier( this ) );
         this.RegisterHandler( new YoutubeHandler( this ) );
         this.RegisterHandler( new TopicHandler( this ) );
@@ -524,6 +523,8 @@ function autocompleteUsername( $input, names )
 
 function textEntryKeydown( event )
 {
+    var KEY_TAB = 9;
+
     if ( event.which == KEY_TAB )
     {
         autocompleteUsername( $(event.target), g_GrmbleChat.GetNicknames() );

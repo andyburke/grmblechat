@@ -5,20 +5,22 @@ function AudioHandler()
     
     this.HandleMessage = function( msg )
     {
-        if ( msg.rawHTML )
+        if ( msg.links.length > 0 )
         {
-            return;
-        }
-        
-        var audio = msg.content.match( /(https?:\/\/.*?mp3)(?:\W|$)/ig );
-        if ( audio && audio.length )
-        {
-            $.each( audio, function( i )
+            for ( linkIndex = 0; linkIndex < msg.links.length; ++linkIndex )
             {
-                msg.content = msg.content.replace( this, '<p id="audioplayer_' + msg.key + '">' + this +'</p><script type="text/javascript"> AudioPlayer.embed("audioplayer_' + msg.key +'", {soundFile: "' + this +'"});</script>' );
-            });
-            
-            msg.rawHTML = true;
+                if ( msg.links[ linkIndex ].href && msg.links[ linkIndex ].href.length > 0 )
+                {
+                    var audio = msg.links[ linkIndex ].href.match( /(https?:\/\/.*?mp3)(?:\W|$)/ig );
+                    if ( audio && audio.length )
+                    {
+                        $.each( audio, function( i )
+                        {
+                            msg.links[ linkIndex ].newText = msg.links[ linkIndex ].href.replace( this, '<p id="audioplayer_' + msg.key + '">' + this +'</p><script type="text/javascript"> AudioPlayer.embed("audioplayer_' + msg.key +'", {soundFile: "' + this +'"});</script>' );
+                        });
+                    }
+                }
+            }
         }
     };
 };

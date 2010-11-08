@@ -7,8 +7,8 @@ function TopicHandler( grmbleChat )
     this.HandleMessage = function( msg )
     {
         this.grmbleChat.GetRoom().topic = msg.content;
-        document.title = this.grmbleChat.GetRoom().name + ': ' + this.grmbleChat.GetRoom().topic;
-        $('#room-topic').text( msg.content );
+        document.title = this.grmbleChat.GetRoom().name + ': ' + htmlEscape( this.grmbleChat.GetRoom().topic );
+        $('#room-topic').text( htmlEscape( msg.content ) );
 
         // are these synchronous?  if so, this isn't good to do this way
         $('#room-topic').fadeTo( 'slow', 0.2 );

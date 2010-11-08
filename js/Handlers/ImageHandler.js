@@ -5,20 +5,22 @@ function ImageHandler( grmbleChat )
     
     this.HandleMessage = function( msg )
     {
-        if ( msg.rawHTML )
+        if ( msg.links.length > 0 )
         {
-            return;
-        }
-        
-        var image = msg.content.match( /(https?:\/\/.*?\.(png|jpg|gif))(?:\W|$)/ig );
-        if ( image && image.length )
-        {
-            $.each( image, function( i )
+            for ( linkIndex = 0; linkIndex < msg.links.length; ++linkIndex )
             {
-                msg.content = msg.content.replace( this, '<img style="max-width: 90%" src="' + this + '">' );
-            });
-            
-            msg.rawHTML = true;
+                if ( msg.links[ linkIndex ].href )
+                {
+                    var image = msg.links[ linkIndex ].href.match( /(https?:\/\/.*?\.(png|jpg|gif))(?:\W|$)/ig );
+                    if ( image && image.length )
+                    {
+                        $.each( image, function( i )
+                        {
+                            msg.links[ linkIndex ].newText = msg.links[ linkIndex ].href.replace( this, '<img style="max-width: 90%" src="' + this + '">' );
+                        });
+                    }
+                }
+            }
         }
     };
 };

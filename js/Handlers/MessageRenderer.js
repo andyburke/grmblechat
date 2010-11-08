@@ -8,7 +8,18 @@ function MessageRenderer( grmbleChat )
     
     this.HandleMessage = function( msg )
     {
-        msg.content = ( typeof( msg.content ) == 'undefined' || msg.content == null ) ? '' : ( msg.rawHTML ? msg.content : htmlEscape( msg.content ) );
+        if ( msg.links && msg.links.length > 0 )
+        {
+            msg.content = '';
+            for ( linkIndex = 0; linkIndex < msg.links.length; ++linkIndex )
+            {
+                msg.content += ( msg.links[ linkIndex ].newText && msg.links[ linkIndex ].newText.length > 0 ) ? msg.links[ linkIndex ].newText : ( ( msg.links[ linkIndex ].href && msg.links[ linkIndex ].href.length > 0 ) ? htmlEscape( msg.links[ linkIndex ].href ) : htmlEscape( msg.links[ linkIndex ].text ) );
+            }
+        }
+        else
+        {
+            msg.content = ( typeof( msg.content ) == 'undefined' || msg.content == null ) ? '' : htmlEscape( msg.content );
+        }
 
         // check for existing message and fix it up        
         var $existingLocalMessage = $('#message-' + msg.clientKey );
