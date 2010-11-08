@@ -93,6 +93,12 @@ function GrmbleChat()
         }
     };
 
+    function Error( message )
+    {
+        $('#errorBarContent').html( message );
+        $('#errorBar').slideDown( 'fast' );
+    }
+
     function Broadcast( broadcastMessage )
     {
         if ( typeof( messageHandlers[ broadcastMessage.type ] ) == 'undefined' )
@@ -125,8 +131,7 @@ function GrmbleChat()
                     return typeof( obj );
                 }
 
-                $('#errorBar').html( 'Error executing handler \'' + getObjectClass( messageHandlers[ broadcastMessage.type ][ handlerIndex ] ) + '\': ' + error );
-                $('#errorBar').slideDown( 'fast' );
+                Error( 'Error executing handler \'' + getObjectClass( messageHandlers[ broadcastMessage.type ][ handlerIndex ] ) + '\': ' + error );
             }
         }
     };
@@ -189,8 +194,7 @@ function GrmbleChat()
 
         function error( request, status, error )
         {
-            $('#errorBar').html( 'An error has occured sending a message to the server.  You should probably reload.' );
-            $('#errorBar').slideDown( 'fast' );
+            Error( 'An error has occured sending a message to the server.  You should probably reload.' );
             do_polling = true;
             m_Busy = false;
         }
@@ -222,8 +226,7 @@ function GrmbleChat()
 
         function error( request, status, error )
         {
-            $('#errorBar').html( 'An error has occured refreshing your account information.  You should probably reload.' );
-            $('#errorBar').slideDown( 'fast' );
+            Error( 'An error has occured refreshing your account information.  You should probably reload.' );
             m_Busy = false;
         }
 
@@ -264,8 +267,7 @@ function GrmbleChat()
 
         function error( request, status, error )
         {
-            $('#errorBar').html( 'An error has occured updating the userlist.  You should probably reload.' );
-            $('#errorBar').slideDown( 'fast' );
+            Error( 'An error has occured updating the userlist.  You should probably reload.' );
             m_Busy = false;
         }
 
@@ -285,16 +287,14 @@ function GrmbleChat()
         {
             if ( data[ 'response_status' ] != 'OK' )
             {
-                $('#errorBar').html( data[ 'response_status' ] );
-                $('#errorBar').slideDown( 'fast' );
+                Error( data[ 'response_status' ] );
             }
             m_Busy = false;
         }
 
         function error( request, status, error )
         {
-            $('#errorBar').html( 'An error occurred trying to join the room.  You should probably reload.' );
-            $('#errorBar').slideDown( 'fast' );
+            Error( 'An error occurred trying to join the room.  You should probably reload.' );
             m_Busy = false;
         }
 
@@ -328,8 +328,7 @@ function GrmbleChat()
 
             if ( data[ 'response_status' ] != 'OK' )
             {
-                $('#errorBar').html( "Error: '%s'.  We'll keep trying, but you should probably reload." % data[ 'response_status' ] );
-                $('#errorBar').slideDown( 'fast' );
+                Error( "Error: '%s'.  We'll keep trying, but you should probably reload." % data[ 'response_status' ] );
 
                 // give the server/network/etc some time to settle before retrying
                 updateInterval = updateInterval_error;
@@ -361,8 +360,7 @@ function GrmbleChat()
             // give the server/network/etc some time to settle before retrying
             updateInterval = updateInterval_error;
 
-            $('#errorBar').html( 'An error occurred trying to get new messages from the server.  You should probably reload.' );
-            $('#errorBar').slideDown( 'fast' );
+            Error( 'An error occurred trying to get new messages from the server.  You should probably reload.' );
             m_Busy = false;
         }
 
