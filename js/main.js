@@ -244,6 +244,8 @@ function GrmbleChat()
         {
             nicknames = [];
 
+            $("#userlist").find("tr:gt(0)").remove();
+            
             $.each( data, function( index, roomlist )
             {
                 nicknames.push( roomlist.account.nickname );
@@ -387,6 +389,8 @@ function GrmbleChat()
     this.Start = function()
     {
         JoinRoom();
+        UpdateChat();
+        UpdateUsers();
         Loop();
     }
 
