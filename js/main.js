@@ -391,8 +391,7 @@ function GrmbleChat()
     this.Start = function()
     {
         JoinRoom();
-        UpdateUsers();
-        UpdateChat();
+        UpdateChat(); // will call UpdateUsers the first time through
         Loop();
     }
 
