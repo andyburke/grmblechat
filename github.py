@@ -17,7 +17,9 @@ from utils import *
 class GithubHandler( webapp.RequestHandler ):
 
     def post( self, roomKey, apiKey ):
-        room = Room.all().filter('__key__ =', Key(roomKey)).get()
+        room = Room.all().filter( 'slug =', roomKey ).get()
+        if not room:
+            room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
 
         if ( not room ):
             self.response.out.write( simplejson.dumps( {'response_status' : 'No such room.' } ) )

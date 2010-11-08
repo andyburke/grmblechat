@@ -52,10 +52,10 @@ class RoomCollectionHandler(webapp.RequestHandler):
 class RoomHandler(webapp.RequestHandler):
 
     @LoginRequired
-    def get(self, room_key):
-        room = Room.all().filter('slug =', room_key).get()
+    def get(self, roomKey):
+        room = Room.all().filter( 'slug =', roomKey ).get()
         if not room:
-            room = Room.all().filter( '__key__ =', Key( room_key ) ).get()
+            room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
             if not room:
                 # room doesn't exist
                 self.error(404)
@@ -68,16 +68,6 @@ class RoomHandler(webapp.RequestHandler):
             return
 
         admin = RoomAdmin.all().filter( 'room = ', room ).filter( 'account =', account ).get()
-        roomlist = RoomList.all().filter( 'room =', room ).filter('account = ', account).get()
-        if not roomlist:
-            #add us to the room we've just joined.
-            roomlist = RoomList(account=account, room=room)
-            roomlist.put()
-            #send a message to update everyone elses contact list
-            user = users.get_current_user()
-            timestamp = datetime.now()
-            message = Message( nickname = account.nickname, sender = account, room = room, timestamp = timestamp, type = 'join' )
-            message.put()
             
         context = {
             'room': room,
@@ -100,7 +90,7 @@ class AdminHandler( webapp.RequestHandler ):
         room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
 
         if ( not room ):
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % room_key } ) )
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % roomKey } ) )
             return
 
         admin = RoomAdmin.all().filter( 'room =', room ).filter( 'account =', account ).get()
@@ -131,7 +121,7 @@ class AdminHandler( webapp.RequestHandler ):
         room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
 
         if ( not room ):
-            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % room_key } ) )
+            self.response.out.write( template.render( 'templates/error.html', { 'error': 'Could not locate a room for the key: %s' % roomKey } ) )
             return
 
         admin = RoomAdmin.all().filter( 'room =', room ).filter( 'account =', account ).get()
@@ -151,8 +141,8 @@ class AdminHandler( webapp.RequestHandler ):
 
 class LeaveHandler( webapp.RequestHandler ):
     
-    def post( self, room_key ):
-        room = Room.all().filter( '__key__ =', Key( room_key ) ).get()
+    def post( self, roomKey ):
+        room = Room.all().filter( '__key__ =', Key( roomKey ) ).get()
         account = get_account()
         leave_room( room = room, account = account )
         self.redirect( '/room/' )

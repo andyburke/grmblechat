@@ -123,7 +123,7 @@ class MessageCollectionHandler( webapp.RequestHandler ):
         timestamp = datetime.now()
 
         try:
-            clientMessage = simplejson.loads( cgi.escape( self.request.get( 'message' ) ) )
+            clientMessage = simplejson.loads( self.request.get( 'message' ) )
         except Exception, e:
             emitError( self, 'Could not parse message json: ' + str( e ) )
             return

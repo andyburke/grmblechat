@@ -46,4 +46,4 @@ class Message(db.Model):
     room = db.ReferenceProperty( reference_class = Room, required = True )
     timestamp = db.DateTimeProperty( auto_now_add = True, required = True )
     type = db.StringProperty( required = True )
-    content = db.StringProperty()
+    content = db.StringProperty( multiline = True )
