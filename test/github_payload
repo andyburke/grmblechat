@@ -20,7 +20,7 @@ payload={
         "email": "chris@ozmm.org",
         "name": "Chris Wanstrath"
       },
-      "message": "okay i give in",
+      "message": "okay i give in\nblah foo",
       "timestamp": "2008-02-15T14:57:17-08:00",
       "added": ["filepath.rb"]
     },
