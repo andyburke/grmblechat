@@ -273,7 +273,7 @@ class JoinHandler( webapp.RequestHandler ):
             roomlist.status = 'active'
             roomlist.status_start = datetime.now()
             roomlist.update_presence()
-            payload = { 'response_status': 'OK' }
+            payload = { 'response_status': 'OK', 'existing_session': str( roomlist.key() ) }
         else:
 
             if ( room.invite ):
@@ -287,7 +287,9 @@ class JoinHandler( webapp.RequestHandler ):
             roomlist = RoomList( account = account, room = room )
             roomlist.update_presence()
 
-            payload = { 'response_status' : 'OK' }
+            Message( sender = account, room = room, timestamp = datetime.now(), type = 'join' ).put()
+
+            payload = { 'response_status' : 'OK', 'new_session': str( roomlist.key() ) }
 
         json = simplejson.dumps( payload )
         self.response.out.write( json )
