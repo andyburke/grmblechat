@@ -149,7 +149,7 @@ h3#room-users {
     left: 0;
     background: #ffffff;
     height: 5em;
-    width: 80%;
+    width: 81%;
     padding: 0.1em;
 }
 
@@ -199,6 +199,7 @@ textarea:focus {
 
 .text-entry-spacer {
     height: 6.1em;
+    z-index: 10;
 }
 
 .edit {
