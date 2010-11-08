@@ -531,10 +531,16 @@ function autocompleteUsername( $input, names )
 function textEntryKeydown( event )
 {
     var KEY_TAB = 9;
+    var KEY_ENTER = 13;
 
     if ( event.which == KEY_TAB )
     {
         autocompleteUsername( $(event.target), g_GrmbleChat.GetNicknames() );
+        return false;
+    }
+    else if ( event.which == KEY_ENTER && !event.shiftKey )
+    {
+        textEntrySubmit();
         return false;
     }
 }

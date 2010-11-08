@@ -149,8 +149,8 @@ h3#room-users {
     left: 0;
     background: #ffffff;
     height: 5em;
-    width: 100%;
-    padding: 0 1.5em;
+    width: 80%;
+    padding: 0.1em;
 }
 
 #text-entry > div {
@@ -159,11 +159,46 @@ h3#room-users {
 }
 
 #text-entry-content {
-    width: 600px;
+    float: left;
+    z-index: 100;
+    width: 90%;
+    height: 4em;
+    padding: 2px;
+    border: 1px solid #EEEEEE;
+    border-bottom-left-radius: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -webkit-border-top-left-radius: 5px;
+    resize: none;
+}
+
+#send-message {
+    z-index: 100;
+    width: 8%;
+    height: 4.45em;
+    padding: 2px;
+    margin: 6px 5px 5px 0px;
+    border: 1px solid #EEEEEE;
+    border-bottom-right-radius: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-right-radius: 5px;
+    color: black;
+    font: bold; 
+    background-color: #DDDDDF;
+    border-color: #CCC #999 #999 #CCC;
+}
+
+textarea:focus {
+  border: 1px solid #DEDEFF;
 }
 
 .text-entry-spacer {
-    height: 5em;
+    height: 6.1em;
 }
 
 .edit {
