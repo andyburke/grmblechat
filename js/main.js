@@ -449,18 +449,6 @@ function OnUnidle()
     g_GrmbleChat.CreateAndSendMessage( 'active', '' );
 }
 
-function textEntrySubmit()
-{
-    var msg = $('#text-entry-content').val();
-    if ( msg.length > 0 )
-    {
-        g_GrmbleChat.CreateAndSendMessage( 'message', msg );        
-        $('#text-entry-content').val('');
-    }
-    
-    return false;
-}
-
 // finds the longest common substring in the given data set.
 // takes an array of strings and a starting index
 function longestInCommon( candidates, index )
@@ -528,10 +516,37 @@ function autocompleteUsername( $input, names )
     return false;
 }
 
+var g_MessageHistory = [];
+var g_MessageHistoryOffset = 0;
+var g_MessageHistorySize = 100;
+var g_MessageHistoryPartialEntry = '';
+
+function textEntrySubmit()
+{
+    var msg = $('#text-entry-content').val();
+    if ( msg.length > 0 )
+    {
+        g_MessageHistoryPartialEntry = '';
+        g_MessageHistory.push( msg );
+
+        while( g_MessageHistory.length > g_MessageHistorySize )
+        {
+            g_MessageHistory.shift();
+        }
+
+        g_GrmbleChat.CreateAndSendMessage( 'message', msg );        
+        $('#text-entry-content').val('');
+    }
+    
+    return false;
+}
+
 function textEntryKeydown( event )
 {
     var KEY_TAB = 9;
     var KEY_ENTER = 13;
+    var KEY_UP = 38;
+    var KEY_DOWN = 40;
 
     if ( event.which == KEY_TAB )
     {
@@ -542,6 +557,40 @@ function textEntryKeydown( event )
     {
         textEntrySubmit();
         return false;
+    }
+    else if ( event.ctrlKey )
+    {
+        if ( event.which == KEY_UP )
+        {
+            if ( g_MessageHistory.length > 0 )
+            {
+                if ( g_MessageHistoryOffset == 0 )
+                {
+                    g_MessageHistoryPartialEntry = $('#text-entry-content').val();   
+                }
+
+                g_MessageHistoryOffset = ++g_MessageHistoryOffset > g_MessageHistory.length ? g_MessageHistory.length : g_MessageHistoryOffset;
+                $('#text-entry-content').val( g_MessageHistory[ g_MessageHistory.length - g_MessageHistoryOffset ] );
+            }
+            return false;
+        }
+        else if ( event.which == KEY_DOWN )
+        {
+            if ( g_MessageHistory.length > 0 )
+            {
+                if ( g_MessageHistoryOffset > 1 )
+                {
+                    --g_MessageHistoryOffset;
+                    $('#text-entry-content').val( g_MessageHistory[ g_MessageHistory.length - g_MessageHistoryOffset ] );
+                }
+                else if ( g_MessageHistoryOffset > 0 )
+                {
+                    --g_MessageHistoryOffset;
+                    $('#text-entry-content').val( g_MessageHistoryPartialEntry );
+                }
+            }
+            return false;
+        }
     }
 }
 
