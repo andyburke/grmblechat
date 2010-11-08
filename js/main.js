@@ -285,12 +285,7 @@ function GrmbleChat()
 
         function success( data )
         {
-            if ( data[ 'response_status' ] == 'OK' )
-            {
-                // populate our user list
-                UpdateUsers();
-            }
-            else
+            if ( data[ 'response_status' ] != 'OK' )
             {
                 $('#errorBar').html( data[ 'response_status' ] );
                 $('#errorBar').slideDown( 'fast' );
