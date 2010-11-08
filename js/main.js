@@ -426,6 +426,7 @@ function GrmbleChat()
         this.RegisterHandler( new AudioHandler( this ) );
         this.RegisterHandler( new ImageHandler( this ) );
         this.RegisterHandler( new HighlightMeHandler( this ) );
+        this.RegisterHandler( new FancyBoxer( this ) );
     }
     
     return this;

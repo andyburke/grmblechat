@@ -16,7 +16,8 @@ function ImageHandler( grmbleChat )
                     {
                         $.each( image, function( i )
                         {
-                            msg.links[ linkIndex ].newText = msg.links[ linkIndex ].href.replace( this, '<img style="max-width: 90%" src="' + this + '">' );
+                            var linkId = 'fancyImg-' + $.sha1( this );
+                            msg.links[ linkIndex ].newText = '<a id="' + linkId + '" href="' + this + '">' + msg.links[ linkIndex ].href.replace( this, '<img style="max-width: 90%" src="' + this + '">' ) + '</a>';
                         });
                     }
                 }
