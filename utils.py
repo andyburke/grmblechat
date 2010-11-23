@@ -11,6 +11,16 @@ from models import *
 __all__ = ['leave_room', 'gravatar', 'slugify', 'get_account', 'transform_message']
 
 
+def linkify(re_match):
+   """Convert a single matched URL to markup to insert into a document
+   in situ."""
+   url = re_match.group(1)
+   ext = url[-4:]
+   if ext.lower() in (".png", ".jpg", ".gif"):
+      return "[![Image]({})".format(url)
+   else:
+      return "<{}>".format(url)
+
 def leave_room(room=None, account=None, session=None):
     """
     Handles app logic for a user leaving a room.
@@ -78,18 +88,9 @@ def transform_message(message):
             output_format='html4'
     )
     if content is not None:
-        r="((?:https?)://[^ \t\n\r()\"']+)"
-        m = re.search(r, content)
-        if (m):
-            url = m.group(1)
-            r2="(?i)\.(jpg|png|gif)$"
-            m = re.search(r2,url)
-            new_content = ''
-            if (m):
-                new_content = '[![Image](' + url + ')](' + url +')'
-            else:
-                new_content = '<' + url + '>'
-            content = re.sub(r,new_content,content)
+        ## HTML is not a Regular language.  Here be dragons.
+        content = re.sub(r"(?i)(https?://[^ \t\n\r()\"']+)", content, linkify)
+
         if (Message_event_names[message.event] == "topic"):
             message.content = md_nohtml.convert(content)
             message.content = re.sub("<\/?p>","", message.content)
