@@ -12,14 +12,14 @@ __all__ = ['leave_room', 'gravatar', 'slugify', 'get_account', 'transform_messag
 
 
 def linkify(re_match):
-   """Convert a single matched URL to markup to insert into a document
-   in situ."""
-   url = re_match.group(1)
-   ext = url[-4:]
-   if ext.lower() in (".png", ".jpg", ".gif"):
-      return "[![Image]({})".format(url)
-   else:
-      return "<{}>".format(url)
+    """Convert a single matched URL to markup to insert into a document
+    in situ."""
+    url = re_match.group(1)
+    ext = url[-4:]
+    if ext.lower() in (".png", ".jpg", ".gif"):
+        return "[![Image]({})".format(url)
+    else:
+        return "<{}>".format(url)
 
 def leave_room(room=None, account=None, session=None):
     """
