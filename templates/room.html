@@ -38,10 +38,10 @@
         <input type="submit" value="Leave Room" id="leave" />
       </p>
     </form>
-	<div id="settings">
-		<a href="https://github.com/pfibiger/grumblechat/issues" target="_blank">Bug/Feature Request</a><br>
-		<a href="/account/{{ account.key }}">My Settings</a>
-	</div>
+    <div id="settings">
+        <a href="https://github.com/pfibiger/grumblechat/issues" target="_blank">Bug/Feature Request</a><br>
+        <a href="/account/{{ account.key }}">My Settings</a>
+    </div>
 </div>
 <div class="superfluous-surrounding">
 <table id="chatlog">
@@ -53,7 +53,7 @@
 
 <form id="text-entry" action="/room/{{ room.key.name }}/msg" method="post">  
   <div>
-    <input id="text-entry-content" type="text" name="content" autocomplete="off" placeholder="UR MSG HERE"/>
+    <input id="text-entry-content" type="text" name="content" autocomplete="off" placeholder="UR MSG HERE"/ autofocus>
   </div>
 </form>
 </div>
