@@ -11,6 +11,16 @@ from models import *
 __all__ = ['leave_room', 'gravatar', 'slugify', 'get_account', 'transform_message']
 
 
+def linkify(re_match):
+    """Convert a single matched URL to markup to insert into a document
+    in situ."""
+    url = re_match.group(1)
+    ext = url[-4:]
+    if ext.lower() in (".png", ".jpg", ".gif"):
+        return "[![Image]({})".format(url)
+    else:
+        return "<{}>".format(url)
+
 def leave_room(room=None, account=None, session=None):
     """
     Handles app logic for a user leaving a room.
@@ -79,8 +89,9 @@ def transform_message(message):
             output_format='html4'
     )
     if content is not None:
-        content = re.sub(r"((?:https?)://[^ \t\n\r()\"']+)", r"<\1>", content)
+        content = re.sub(r"(?i)(https?://[^ \t\n\r()\"']+)", r"<\1>", content)
         content = re.sub(r"<(http[^>]+(?:jpg|jpeg|png|gif))>", r"[![Image](\1)](\1)", content)
+
         if (Message_event_names[message.event] == "topic"):
             message.content = md_nohtml.convert(content)
             message.content = re.sub("<\/?p>","", message.content)
