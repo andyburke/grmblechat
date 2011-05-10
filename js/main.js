@@ -10,7 +10,6 @@ function GrmbleChat()
     var updateInterval = updateInterval_min;
     var message_display_max = 70;
     var timestamp_iso8601_format = 'Y-m-d\TH:i:s';
-    var do_polling = true;
 
     var room = null;
     var account = null;
@@ -21,6 +20,7 @@ function GrmbleChat()
 
     var m_Busy = false;
     var m_GotInitialChatBundle = false;
+    var m_ActiveErrors = {};
 
     var messageHandlers = {
                                 'message': [],
@@ -93,10 +93,22 @@ function GrmbleChat()
         }
     };
 
-    function Error( message )
+    function Error( errorType, message )
     {
-        $('#errorBarContent').html( message );
+        m_ActiveErrors[ errorType ] = message;
+
+        $('#errorBarContent').html( '' );
+        for ( var type in m_ActiveErrors )
+        {
+            $('#errorBarContent').html( $('#errorBarContent').html() + '<br>' + message );
+        }
+
         $('#errorBar').slideDown( 'fast' );
+    }
+
+    function ClearError()
+    {
+        $('#errorBar').hide();
     }
 
     function Broadcast( broadcastMessage )
@@ -177,8 +189,6 @@ function GrmbleChat()
     {
         function success( data )
         {
-            do_polling = true;
-            
             response = $.parseJSON( data );
             
             if ( response[ 'response_status' ] == 'OK' )
@@ -195,7 +205,6 @@ function GrmbleChat()
         function error( request, status, error )
         {
             Error( 'An error has occured sending a message to the server.  You should probably reload.' );
-            do_polling = true;
             m_Busy = false;
         }
 
@@ -203,7 +212,6 @@ function GrmbleChat()
 
         // FIXME: we should even handle sending to the server with a Handler
         var post_url = '/api/room/' + room.key + '/msg/';
-        do_polling = false;
         jsonMessage = $.toJSON( messageToSend )
         $.ajax(
         {
